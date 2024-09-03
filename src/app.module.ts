@@ -16,11 +16,14 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
-    MongooseModule.forRoot(mongooseConfigUri), PublicacionesModule, ChatsModule, UsersModule,
+    MongooseModule.forRoot(mongooseConfigUri),
+    PublicacionesModule,
+    ChatsModule,
+    UsersModule,
     AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [TypeOrmModule]
 })
-export class AppModule { }
 export class AppModule { }
