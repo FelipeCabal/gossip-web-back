@@ -14,7 +14,7 @@ export class User {
     email: string
 
     @Column({ type: 'date' })
-    fechaNto: string
+    fechaNto: Date
 
     @Column()
     sexo: string

@@ -7,13 +7,11 @@ export class CreateUserDto {
 
     @IsNotEmpty()
     @IsEmail()
-    @IsString()
     email: string
 
     @IsDate()
-    @IsString()
     @IsNotEmpty()
-    fechaNto: string
+    fechaNto: Date
 
     @IsString()
     @IsNotEmpty()
