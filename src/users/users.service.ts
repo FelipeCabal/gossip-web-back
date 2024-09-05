@@ -60,4 +60,14 @@ export class UsersService {
       throw new HttpException("User can't be delete", HttpStatus.CONFLICT)
     }
   }
+
+  async findByEmail(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
+  }
 }
