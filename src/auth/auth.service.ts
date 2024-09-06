@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,11 +28,22 @@ export class AuthService {
         };
     }
 
-    async register() {
+    async register(registerFields: CreateUserDto) {
+        const login: LoginDto = {
+            email: registerFields.email,
+            password: registerFields.password
+        }
+        const user = await this.UsersService.createUser(registerFields)
 
+        if (!user) {
+            throw new HttpException('The user was not created', HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        return this.login(login)
     }
 
-    async profile() {
-
+    async profile(id: number) {
+        const user = await this.UsersService.findOneUser(id)
+        return user
     }
 }
