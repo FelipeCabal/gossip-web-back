@@ -11,10 +11,14 @@ export class publicacionesSchema {
     @Prop({
         unique: true,
         type: Types.ObjectId,
-        default: () => new Types.ObjectId()
-
+        default: () => new Types.ObjectId
     })
-    publicacionId: Types.ObjectId
+    id: Types.ObjectId
+
+    @Prop({
+        unique: true
+    })
+    publicacionId: number
 
     @Prop()
     comentarios: comentariosSchema

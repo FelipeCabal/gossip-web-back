@@ -21,7 +21,7 @@ export class comentariosSchema {
     @Prop({
         trim: true
     })
-    comentarios: string
+    comentario: string
 }
 
 export const comentarioModelSchema = SchemaFactory.createForClass(comentariosSchema)

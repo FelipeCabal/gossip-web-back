@@ -21,7 +21,7 @@ export class mensajesSchema {
     @Prop({
         trim: true
     })
-    mensajes: string
+    mensaje: string
 }
 
 export const mensajeModelSchema = SchemaFactory.createForClass(mensajesSchema)

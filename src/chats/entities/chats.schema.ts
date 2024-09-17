@@ -8,13 +8,18 @@ import { mensajesSchema } from "./mensajes.schema";
 export class chatsSchema {
 
     @Prop({
+        unique: true,
+        type: Types.ObjectId,
+        default: () => new Types.ObjectId
+    })
+    id: Types.ObjectId
+
+    @Prop({
         unique: true
     })
     chatId: number
 
-    @Prop({
-        trim: true
-    })
+    @Prop()
     mensajes: mensajesSchema
 }
 
