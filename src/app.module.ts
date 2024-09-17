@@ -28,6 +28,6 @@ import { mensajeModelSchema, mensajesSchema } from './chats/entities/mensajes.sc
   ],
   controllers: [AppController],
   providers: [AppService],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule, MongooseModule]
 })
 export class AppModule { }
