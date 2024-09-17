@@ -8,16 +8,14 @@ import { mensajesSchema } from "./mensajes.schema";
 export class chatsSchema {
 
     @Prop({
-        unique: true,
-        type: Types.ObjectId,
-        default: () => new Types.ObjectId()
+        unique: true
     })
-    chatId: Types.ObjectId
+    chatId: number
 
     @Prop({
         trim: true
     })
-    mensaje: mensajesSchema
+    mensajes: mensajesSchema
 }
 
 export const chatModelSchema = SchemaFactory.createForClass(chatsSchema)

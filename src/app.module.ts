@@ -21,24 +21,6 @@ import { mensajeModelSchema, mensajesSchema } from './chats/entities/mensajes.sc
     }),
     TypeOrmModule.forRoot(typeOrmConfig),
     MongooseModule.forRoot(mongooseConfigUri),
-    MongooseModule.forFeature([
-      {
-        name: publicacionesSchema.name,
-        schema: publicacionModelSchema
-      },
-      {
-        name: comentariosSchema.name,
-        schema: comentarioModelSchema
-      },
-      {
-        name: chatsSchema.name,
-        schema: chatModelSchema
-      },
-      {
-        name: mensajesSchema.name,
-        schema: mensajeModelSchema
-      }
-    ]),
     PublicacionesModule,
     ChatsModule,
     UsersModule,

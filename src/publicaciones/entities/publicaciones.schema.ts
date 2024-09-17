@@ -16,7 +16,8 @@ export class publicacionesSchema {
     })
     publicacionId: Types.ObjectId
 
-    comentario: comentariosSchema
+    @Prop()
+    comentarios: comentariosSchema
 
 }
 

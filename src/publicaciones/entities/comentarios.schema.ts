@@ -14,16 +14,14 @@ export class comentariosSchema {
     comentarioId: Types.ObjectId
 
     @Prop({
-        unique: true,
-        type: Types.ObjectId,
-        default: () => new Types.ObjectId()
+        unique: true
     })
-    usuarioId: Types.ObjectId
+    usuarioId: number
 
     @Prop({
         trim: true
     })
-    comentario: string
+    comentarios: string
 }
 
 export const comentarioModelSchema = SchemaFactory.createForClass(comentariosSchema)
