@@ -9,10 +9,6 @@ import { typeOrmConfig, mongooseConfigUri } from './config/data.source';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
-import { publicacionesSchema, publicacionModelSchema } from './publicaciones/entities/publicaciones.schema';
-import { comentarioModelSchema, comentariosSchema } from './publicaciones/entities/comentarios.schema';
-import { chatModelSchema, chatsSchema } from './chats/entities/chats.schema';
-import { mensajeModelSchema, mensajesSchema } from './chats/entities/mensajes.schema';
 
 @Module({
   imports: [
