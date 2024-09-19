@@ -1,7 +1,7 @@
 import { Exclude } from "class-transformer";
 import { Comunidades, Grupos } from "src/chats/entities/chats.entity";
 import { Publicaciones } from "src/publicaciones/entities/publicaciones.entity";
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
 export class User {
@@ -28,9 +28,8 @@ export class User {
     @Column()
     pais: string
 
-    @ManyToMany(() => Publicaciones, (publicaciones) => publicaciones.user)
-    @JoinTable()
-    publicaciiones: Publicaciones[]
+    @OneToMany(() => Publicaciones, (publicaciones) => publicaciones.user)
+    publicaciones: Publicaciones[]
 
     @ManyToMany(() => Comunidades, (comunidades) => comunidades.user)
     @JoinTable()
