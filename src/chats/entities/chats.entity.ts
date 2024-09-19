@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumnCannotBeNullableError, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/entities/user.entity";
+import { Column, Entity, ManyToMany, PrimaryColumnCannotBeNullableError, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('chatsPrivados')
 export class ChatPrivado {
@@ -16,6 +17,9 @@ export class Grupos {
 
     @Column()
     descripcion: string
+
+    @ManyToMany(() => User, (user) => user.grupos)
+    user: User[]
 }
 
 @Entity('comunidades')
@@ -29,4 +33,7 @@ export class Comunidades {
 
     @Column()
     descripcion: string
+
+    @ManyToMany(() => User, (user) => user.comunidades)
+    user: User[]
 }

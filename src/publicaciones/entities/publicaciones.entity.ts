@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/entities/user.entity";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('publicaciones')
 export class Publicaciones {
@@ -13,4 +14,7 @@ export class Publicaciones {
 
     @Column({ default: false })
     esAnonimo: boolean
+
+    @ManyToMany(() => User, (user) => user.publicaciiones)
+    user: User[]
 }
