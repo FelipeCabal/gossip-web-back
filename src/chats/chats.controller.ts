@@ -5,7 +5,7 @@ import { createGrupoDto } from './dto/GruposDto/create-grupos.dto';
 import { updateGruposDto } from './dto/GruposDto/update-grupos.dto';
 
 @Controller('chats')
-@ApiTags('Grupos y Comunidades')
+@ApiTags('chats')
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) { }
 

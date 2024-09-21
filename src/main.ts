@@ -29,13 +29,13 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('Gossip-Web')
+    .setDescription('The Gossip-Web API description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('Gossip-Web')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(configService.get('PORT', 3000));
 }
