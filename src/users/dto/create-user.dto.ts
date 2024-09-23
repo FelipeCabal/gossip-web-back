@@ -25,4 +25,3 @@ export class CreateUserDto {
     @IsNotEmpty()
     pais: string
 }
-
