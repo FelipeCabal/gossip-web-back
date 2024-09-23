@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { CORS } from './config/constants/cors';
 import * as morgan from 'morgan';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
 
@@ -26,6 +27,15 @@ async function bootstrap() {
   );
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+
+  const config = new DocumentBuilder()
+    .setTitle('Gossip-Web')
+    .setDescription('The Gossip-Web API description')
+    .setVersion('1.0')
+    .addTag('Gossip-Web')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   await app.listen(configService.get('PORT', 3000));
 }
