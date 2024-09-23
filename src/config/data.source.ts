@@ -6,6 +6,7 @@ const configService = new ConfigService();
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
     type: 'postgres',
+    url: configService.get('DATABASE_URL', null),
     host: configService.get('DB_HOST', 'localhost'),
     port: configService.get('DB_PORT', 5432),
     username: configService.get('DB_USER'),
@@ -18,4 +19,4 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     logging: false,
 }
 
-export const mongooseConfigUri: string = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
+export const mongooseConfigUri: string = process.env.MONGO_URL || 'mongodb://localhost:27017/mydatabase';
