@@ -1,7 +1,9 @@
 import { Exclude } from "class-transformer";
 import { Comunidades, Grupos } from "src/chats/entities/chats.entity";
+import { InvitacionesGrupos } from "src/chats/entities/invitaciones.entity";
 import { Publicaciones } from "src/publicaciones/entities/publicaciones.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, IsNull, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { SolicitudAmistad } from "./solicitud.entity";
 
 @Entity('users')
 export class User {
@@ -28,6 +30,9 @@ export class User {
     @Column()
     pais: string
 
+    @Column({ nullable: true })
+    imagen_perfil: string
+
     @OneToMany(() => Publicaciones, (publicaciones) => publicaciones.user)
     publicaciones: Publicaciones[]
 
@@ -35,7 +40,12 @@ export class User {
     @JoinTable()
     comunidades: Comunidades[]
 
-    @ManyToMany(() => Grupos, (grupos) => grupos.user)
-    @JoinTable()
-    grupos: Grupos[]
+    @OneToMany(() => InvitacionesGrupos, (invitacionesGrupos) => invitacionesGrupos.user)
+    grupos: InvitacionesGrupos[]
+
+    @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userEnvia)
+    enviaSolicitudAmistad: SolicitudAmistad
+
+    @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userRecibe)
+    recibeSolicitudAmistad: SolicitudAmistad
 }

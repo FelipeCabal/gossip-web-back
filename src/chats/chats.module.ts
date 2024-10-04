@@ -8,10 +8,11 @@ import { chatsSchema } from './entities/chats.schema';
 import { mensajesSchema } from './entities/mensajes.schema';
 import { chatModelSchema } from './entities/chats.schema';
 import { mensajeModelSchema } from './entities/mensajes.schema';
+import { InvitacionesGrupos } from './entities/invitaciones.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ChatPrivado, Grupos, Comunidades]),
+    TypeOrmModule.forFeature([ChatPrivado, Grupos, Comunidades, InvitacionesGrupos]),
     MongooseModule.forFeature([
       {
         name: chatsSchema.name,
