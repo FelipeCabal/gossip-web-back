@@ -6,6 +6,8 @@ import { Publicaciones } from './entities/publicaciones.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { publicacionesSchema, publicacionModelSchema } from './entities/publicaciones.schema';
 import { comentarioModelSchema, comentariosSchema } from './entities/comentarios.schema';
+import { UsersModule } from 'src/users/users.module';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [
@@ -19,10 +21,10 @@ import { comentarioModelSchema, comentariosSchema } from './entities/comentarios
         name: comentariosSchema.name,
         schema: comentarioModelSchema
       }
-    ])
+    ]), UsersModule,
   ],
   controllers: [PublicacionesController],
-  providers: [PublicacionesService],
-  exports: [TypeOrmModule, MongooseModule]
+  providers: [PublicacionesService, UsersService],
+  exports: [TypeOrmModule, MongooseModule, UsersModule]
 })
 export class PublicacionesModule { }
