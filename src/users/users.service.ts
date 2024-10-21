@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { SALT_ROUNDS } from 'src/config/constants/bycript.constants';
+import { SolicitudAmistad } from './entities/solicitud.entity';
 
 @Injectable()
 export class UsersService {
@@ -27,8 +28,44 @@ export class UsersService {
     return user
   }
 
-  findAllUsers() {
+  async findUsers(userName: string, userId: number) {
 
+    const userFriends = await this.findAllFriends(userId);
+
+    const friendsIds = userFriends.map((friend => friend.id));
+
+    const searchFriendName = await this.userRepository
+      .createQueryBuilder("user")
+      .where("user.id IN (:...friendsIds)", { friendsIds })
+      .andWhere("user.name ILIKE :userName ", { userName: `%${userName}%` })
+      .getMany();
+
+    const searchUserName = await this.userRepository
+      .createQueryBuilder("user")
+      .where("user.id NOT IN (:...friendsIds)", { friendsIds })
+      .andWhere("user.id != :userId", { userId })
+      .andWhere("user.name ILIKE :userName", { userName: `%${userName}%` })
+      .getMany();
+
+    if (!searchFriendName.length || !searchUserName.length) {
+      throw new HttpException("There aren't users with this Name", HttpStatus.NOT_FOUND)
+    }
+    const findUsersByName = [...searchFriendName, ...searchUserName]
+
+    return findUsersByName
+  }
+
+  async findAllFriends(userId: number) {
+    const friendsList = await this.userRepository
+      .createQueryBuilder("user")
+      .innerJoin(SolicitudAmistad, "solicitud", "solicitud.status = 'A' AND (solicitud.senderId = :userId OR solicitud.receiver:Id = :userId)", { userId })
+      .where("user.id != :userId", { userId })
+      .getMany();
+
+    if (!friendsList.length) {
+      throw new HttpException("without friends yet", HttpStatus.NOT_FOUND);
+    }
+    return friendsList;
   }
 
   async findOneUser(id: number) {

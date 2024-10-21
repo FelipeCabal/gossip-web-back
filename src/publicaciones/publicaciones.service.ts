@@ -26,11 +26,10 @@ export class PublicacionesService {
    */
   async create(userId: number, createPublicacionesDto: CreatePublicacionesDto) {
     if (createPublicacionesDto.esAnonimo === true) {
-      const newPost = await this.publicacionesRepository.create(createPublicacionesDto);
+      const newPost = this.publicacionesRepository.create(createPublicacionesDto);
 
       return this.publicacionesRepository.save(newPost);
     }
-
     const user = await this.usersService.findOneUser(userId);
     const newPost = await this.publicacionesRepository.create(createPublicacionesDto);
     newPost.user = user;
@@ -39,21 +38,32 @@ export class PublicacionesService {
   }
 
   /**
-   * Find all posts 
-   * @returns array with all posts done 
-   * @throws {HttpException} if there are not posts
+   * findALL
+   * @param userId logged user
+   * @returns all posts
    */
-  async findAll() {
-    const publicaciones = await this.publicacionesRepository
+  async findAll(userId: number) {
+    const friends = await this.usersService.findAllFriends(userId);
+
+    const friendsIds = friends.map((friend => friend.id));
+
+    const friendsPosts = await this.publicacionesRepository
       .createQueryBuilder('publicaciones')
-      .leftJoinAndSelect('publicaciones.user', 'users')
+      .where("publicaciones.userId IN (:...friendsIds)", { friendsIds })
+      .orderBy("publicaciones.id", "DESC")
+      .getMany()
+
+    const otherPosts = await this.publicacionesRepository
+      .createQueryBuilder('publicaciones')
+      .where("publicaciones.userId NOT IN (:...friendsIds)", { friendsIds })
       .orderBy('publicaciones.id', 'DESC')
       .getMany();
 
-    if (!publicaciones.length) {
-      throw new HttpException('posts not found', HttpStatus.NOT_FOUND);
+    if (!friendsPosts.length || !otherPosts.length) {
+      throw new HttpException("There aren't Posts yet", HttpStatus.NOT_FOUND);
     }
-    return publicaciones;
+    const posts = [...friendsPosts, ...otherPosts]
+    return posts;
   }
 
   /**
@@ -65,7 +75,7 @@ export class PublicacionesService {
   async findOne(id: number) {
     const publicacion = await this.publicacionesRepository.findOne({
       where: { id: id.toString() },
-      relations: ['users'],
+      relations: ['user'],
     });
 
     if (!publicacion) {
@@ -95,31 +105,51 @@ export class PublicacionesService {
   }
 
   /**
-   * update 
-   * @param id from post that is being updated
-   * @param updatePublicacionesDto updated data 
-   * @returns post updted
-   * @throws {HttpException} if there is not post
+   * update
+   * @param id post id
+   * @param updatePublicacionesDto data to update post
+   * @param userId user id
+   * @returns post updated
+   * @throws {HttpException} if the post doesn't exists, if the user isn´t authorized, internal error.
    */
-  async update(id: number, updatePublicacionesDto: UpdatePublicacionesDto) {
+  async update(id: number, updatePublicacionesDto: UpdatePublicacionesDto, userId: number) {
+    const post = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+
+    if (!post) {
+      throw new HttpException("post doesn't exists. ", HttpStatus.NOT_FOUND);
+    }
+
+    if (post.user.id != userId) {
+      throw new HttpException("You don't unauthorization for update", HttpStatus.UNAUTHORIZED);
+    }
+
     const updatePost = await this.publicacionesRepository.update(id, updatePublicacionesDto);
     if (updatePost.affected === 0) {
-      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("The post was not updated.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    return updatePost;
   }
 
   /**
    * remove
-   * @param id from post that is deleted 
-   * @returns post deleted 
-   * @throws {HttpException} if there it not post
+   * @param id id post
+   * @param userId user id
+   * @returns post deleted
+   * @throws {HttpException} if the post doesn't exists, if the user isn´t authorized, internal error.
    */
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
+    const post = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+
+    if (!post) {
+      throw new HttpException("The post doesn't exists", HttpStatus.NOT_FOUND);
+    }
+
+    if (post.user.id !== userId) {
+      throw new HttpException("You don't have authorization for this action.", HttpStatus.UNAUTHORIZED);
+    }
+
     const deletePost = await this.publicacionesRepository.delete(id);
     if (deletePost.affected === 0) {
-      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("The post was not deleted.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    return deletePost;
   }
 }

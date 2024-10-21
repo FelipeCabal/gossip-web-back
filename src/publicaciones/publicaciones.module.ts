@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Publicaciones } from './entities/publicaciones.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { publicacionesSchema, publicacionModelSchema } from './entities/publicaciones.schema';
-import { comentarioModelSchema, comentariosSchema } from './entities/comentarios.schema';
+import { comentarioModelSchema, comentariosSchema } from './comentarios/entities/comentarios.schema';
 import { UsersModule } from 'src/users/users.module';
 import { UsersService } from 'src/users/users.service';
+
 
 @Module({
   imports: [
@@ -21,10 +22,11 @@ import { UsersService } from 'src/users/users.service';
         name: comentariosSchema.name,
         schema: comentarioModelSchema
       }
-    ]), UsersModule,
+    ]),
+    UsersModule,
   ],
   controllers: [PublicacionesController],
   providers: [PublicacionesService, UsersService],
-  exports: [TypeOrmModule, MongooseModule, UsersModule]
+  exports: [TypeOrmModule, MongooseModule, UsersModule, PublicacionesService]
 })
 export class PublicacionesModule { }

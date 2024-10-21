@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
 import { PublicacionesService } from './publicaciones.service';
 import { CreatePublicacionesDto } from './dto/create-publicacione.dto';
 import { UpdatePublicacionesDto } from './dto/update-publicacione.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { IsPrivate } from 'src/auth/decorators/isPrivate.decorator';
 
-@Controller('publicaciones')
-@ApiTags('publicaciones')
+@Controller('posts')
+@ApiTags('posts')
+@UseGuards(AuthGuard)
 export class PublicacionesController {
   constructor(private readonly publicacionesService: PublicacionesService) { }
 
@@ -16,7 +18,6 @@ export class PublicacionesController {
    * @returns post newly created
    */
   @Post()
-  @Public()
   @ApiOperation({ summary: "Create a new posts" })
   create(
     @Body() createPublicacionesDto: CreatePublicacionesDto,
@@ -26,18 +27,18 @@ export class PublicacionesController {
     return this.publicacionesService.create(usuario.id, createPublicacionesDto);
   }
 
-
   /**
    * ENDPOINT to get all posts 
    * @returns array with all posts
    */
   @Get()
-  @Public()
   @ApiOperation({ summary: "Get all posts" })
-  findAll() {
-    return this.publicacionesService.findAll();
+  findAll(
+    @Request() req: any
+  ) {
+    const usuario = req.user
+    return this.publicacionesService.findAll(usuario.id);
   }
-
 
   /**
    * ENDPOINT to get one post
@@ -50,7 +51,6 @@ export class PublicacionesController {
     return this.publicacionesService.findOne(+id);
   }
 
-
   /**
    * ENDPOINT to get all post from an user 
    * @param user id from user
@@ -62,7 +62,6 @@ export class PublicacionesController {
     return this.publicacionesService.findByUser(user);
   }
 
-
   /**
    * ENDPOINT to update a post
    * @param id from post 
@@ -70,11 +69,16 @@ export class PublicacionesController {
    * @returns post updated 
    */
   @Patch(':id')
+  @IsPrivate()
   @ApiOperation({ summary: "Update a posts" })
-  update(@Param('id') id: string, @Body() updatePublicacionesDto: UpdatePublicacionesDto) {
-    return this.publicacionesService.update(+id, updatePublicacionesDto);
+  update(
+    @Param('id') id: string,
+    @Body() updatePublicacionesDto: UpdatePublicacionesDto,
+    @Request() req: any
+  ) {
+    const usuario = req.user
+    return this.publicacionesService.update(+id, updatePublicacionesDto, usuario.id);
   }
-
 
   /**
    * ENDPOINT to delete a post
@@ -82,8 +86,13 @@ export class PublicacionesController {
    * @returns post deleted
    */
   @Delete(':id')
+  @IsPrivate()
   @ApiOperation({ summary: "Delete a posts" })
-  remove(@Param('id') id: string) {
-    return this.publicacionesService.remove(+id);
+  remove(
+    @Param('id') id: string,
+    @Request() req: any
+  ) {
+    const usuario = req.user
+    return this.publicacionesService.remove(+id, usuario.id);
   }
 }

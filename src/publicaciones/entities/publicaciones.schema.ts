@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
-import { comentariosSchema } from "./comentarios.schema";
+import { comentariosSchema } from "../comentarios/entities/comentarios.schema";
 
 
 @Schema({
