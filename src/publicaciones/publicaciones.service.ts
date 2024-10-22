@@ -59,10 +59,11 @@ export class PublicacionesService {
       .orderBy('publicaciones.id', 'DESC')
       .getMany();
 
-    if (!friendsPosts.length || !otherPosts.length) {
-      throw new HttpException("There aren't Posts yet", HttpStatus.NOT_FOUND);
+    if (!friendsPosts.length && !otherPosts.length) {
+      return [];
     }
     const posts = [...friendsPosts, ...otherPosts]
+
     return posts;
   }
 
@@ -127,6 +128,7 @@ export class PublicacionesService {
     if (updatePost.affected === 0) {
       throw new HttpException("The post was not updated.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    return updatePost;
   }
 
   /**
@@ -151,5 +153,6 @@ export class PublicacionesService {
     if (deletePost.affected === 0) {
       throw new HttpException("The post was not deleted.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    return deletePost;
   }
 }
