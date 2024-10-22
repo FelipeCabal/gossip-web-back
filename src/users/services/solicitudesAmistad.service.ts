@@ -67,7 +67,9 @@ export class SolicitudesAmistadService {
     async findOneReq(requestId: number) {
         const friendRequest = await this.solicitudRepository
             .createQueryBuilder('solicitud')
-            .where('solicitudes.id = :requestId', { requestId })
+            .leftJoinAndSelect('solicitud.userEnvia', 'userEnvia')
+            .leftJoinAndSelect('solicitud.userRecibe', 'userRecibe')
+            .where('solicitud.id = :requestId', { requestId })
             .getOne();
 
         return friendRequest;

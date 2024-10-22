@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Request, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { SolicitudesAmistadService } from "../services/solicitudesAmistad.service";
 import { AuthGuard } from "src/auth/guards/auth.guard";
@@ -16,8 +16,9 @@ export class solicitudesController {
     @ApiOperation({ summary: 'Send friends request' })
     async FriendRequestSent(
         @Param('userRecibeId') userRecibeId: number,
-        @Body('userEnviaId') userEnviaId: number
+        @Request() req: any
     ) {
+        const userEnviaId = req.user
         return this.solicitudesAmistadService.sendFriendRequest(userEnviaId, userRecibeId);
     }
 
