@@ -9,7 +9,7 @@ export class Publicaciones {
     @Column()
     description: string
 
-    @Column()
+    @Column({ nullable: true })
     imagen: string
 
     @Column({ default: false })
