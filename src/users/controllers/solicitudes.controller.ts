@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { SolicitudesAmistadService } from "../services/solicitudesAmistad.service";
 import { AuthGuard } from "src/auth/guards/auth.guard";
@@ -22,15 +22,15 @@ export class solicitudesController {
     }
 
     @Get('user/received')
-    @UseGuards(AuthGuard)
+    @ApiOperation({ summary: 'all friend requested received for an user' })
     async receivedRequest(
-        @Body('userId') userId: number
+        @Param('userId') userId: number
     ) {
         return this.solicitudesAmistadService.findAllReceiveRequest(userId);
     }
 
-    @Post('request/:requestId/status')
-    @UseGuards(AuthGuard)
+    @Patch('request/:requestId/status')
+    @ApiOperation({ summary: 'update status from friend request' })
     async updateRequestStatus(
         @Param('requestId') requestId: number,
         @Body('userId') userId: number,
@@ -44,7 +44,6 @@ export class solicitudesController {
     }
 
     @Delete(':requestId')
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: 'delete a friend request' })
     async deleteRequest(
         @Param('requestId') requestId: number,

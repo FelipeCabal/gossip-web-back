@@ -64,7 +64,7 @@ export class SolicitudesAmistadService {
         return receiveReq;
     }
 
-    async findOneReq(requestId) {
+    async findOneReq(requestId: number) {
         const friendRequest = await this.solicitudRepository
             .createQueryBuilder('solicitud')
             .where('solicitudes.id = :requestId', { requestId })
@@ -85,16 +85,13 @@ export class SolicitudesAmistadService {
         }
 
         if (newStatus === Status.Aceptada) {
-            return this.solicitudRepository.save({
-                id: requestId,
-                status: Status.Aceptada
-            });
+            return this.solicitudRepository.update(
+                { id: requestId }, { status: Status.Aceptada });
         }
         if (newStatus === Status.Rechazada) {
-            return this.solicitudRepository.save({
-                id: requestId,
-                status: Status.Rechazada
-            });
+            return this.solicitudRepository.update(
+                { id: requestId },
+                { status: Status.Rechazada });
         }
         throw new HttpException("invalid action", HttpStatus.BAD_REQUEST);
     }
