@@ -19,14 +19,15 @@ export class solicitudesController {
         @Request() req: any
     ) {
         const userEnviaId = req.user
-        return this.solicitudesAmistadService.sendFriendRequest(userEnviaId, userRecibeId);
+        return this.solicitudesAmistadService.sendFriendRequest(userEnviaId.id, userRecibeId);
     }
 
     @Get('user/received')
     @ApiOperation({ summary: 'all friend requested received for an user' })
     async receivedRequest(
-        @Param('userId') userId: number
+        @Request() req: any
     ) {
+        const userId = req.user
         return this.solicitudesAmistadService.findAllReceiveRequest(userId);
     }
 
@@ -34,13 +35,13 @@ export class solicitudesController {
     @ApiOperation({ summary: 'update status from friend request' })
     async updateRequestStatus(
         @Param('requestId') requestId: number,
-        @Body('userId') userId: number,
+        @Request() req: any,
         @Body('newStatus') newStatus: Status
     ) {
+        const userId = req.user
         if (!Object.values(Status).includes(newStatus)) {
             throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
         }
-
         return this.solicitudesAmistadService.updateRequest(requestId, userId, newStatus);
     }
 
@@ -48,8 +49,9 @@ export class solicitudesController {
     @ApiOperation({ summary: 'delete a friend request' })
     async deleteRequest(
         @Param('requestId') requestId: number,
-        @Body('userId') userId: number
+        @Request() req: any
     ) {
+        const userId = req.user
         return this.solicitudesAmistadService.deleteRequest(requestId, userId);
     }
 }
