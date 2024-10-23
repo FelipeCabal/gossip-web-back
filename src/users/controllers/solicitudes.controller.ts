@@ -18,7 +18,7 @@ export class solicitudesController {
         @Param('userRecibeId') userRecibeId: number,
         @Request() req: any
     ) {
-        const userEnviaId = req.user
+        const userEnviaId = req.user.id
         return this.solicitudesAmistadService.sendFriendRequest(userEnviaId.id, userRecibeId);
     }
 
@@ -27,7 +27,7 @@ export class solicitudesController {
     async receivedRequest(
         @Request() req: any
     ) {
-        const userId = req.user
+        const userId = req.user.id
         return this.solicitudesAmistadService.findAllReceiveRequest(userId);
     }
 
@@ -38,7 +38,7 @@ export class solicitudesController {
         @Request() req: any,
         @Body('newStatus') newStatus: Status
     ) {
-        const userId = req.user
+        const userId = req.user.id
         if (!Object.values(Status).includes(newStatus)) {
             throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
         }
@@ -51,7 +51,7 @@ export class solicitudesController {
         @Param('requestId') requestId: number,
         @Request() req: any
     ) {
-        const userId = req.user
+        const userId = req.user.id
         return this.solicitudesAmistadService.deleteRequest(requestId, userId);
     }
 }

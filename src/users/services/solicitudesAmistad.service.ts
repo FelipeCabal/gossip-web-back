@@ -118,5 +118,6 @@ export class SolicitudesAmistadService {
         if (deleteRequest.affected === 0) {
             throw new HttpException("The request wasn't deleted", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        return deleteRequest
     }
 }
