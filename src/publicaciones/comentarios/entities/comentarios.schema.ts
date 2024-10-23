@@ -14,7 +14,7 @@ export class comentariosSchema {
     comentarioId: Types.ObjectId
 
     @Prop({
-        unique: true
+        unique: true,
     })
     usuarioId: number
 
@@ -22,6 +22,9 @@ export class comentariosSchema {
         trim: true
     })
     comentario: string
+
+    @Prop({ required: true })
+    postId: number
 }
 
 export const comentarioModelSchema = SchemaFactory.createForClass(comentariosSchema)

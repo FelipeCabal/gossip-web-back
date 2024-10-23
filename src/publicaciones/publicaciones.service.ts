@@ -1,26 +1,155 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePublicacionesDto } from './dto/create-publicacione.dto';
 import { UpdatePublicacionesDto } from './dto/update-publicacione.dto';
+import { UsersService } from 'src/users/services/users.service';
+import { Publicaciones } from './entities/publicaciones.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 
 @Injectable()
 export class PublicacionesService {
-  create(createPublicacionesDto: CreatePublicacionesDto) {
-    return 'This action adds a new publicacione';
+
+  constructor(
+    private readonly usersService: UsersService,
+    @InjectRepository(Publicaciones)
+    private readonly publicacionesRepository: Repository<Publicaciones>
+
+  ) { }
+
+
+  /**
+   * Create new post
+   * @param userId id from post' creator 
+   * @param createPublicacionesDto data to create a new post
+   * @returns post newly created 
+   */
+  async create(userId: number, createPublicacionesDto: CreatePublicacionesDto) {
+    if (createPublicacionesDto.esAnonimo === true) {
+      const newPost = this.publicacionesRepository.create(createPublicacionesDto);
+
+      return this.publicacionesRepository.save(newPost);
+    }
+    const user = await this.usersService.findOneUser(userId);
+    const newPost = await this.publicacionesRepository.create(createPublicacionesDto);
+    newPost.user = user;
+
+    return this.publicacionesRepository.save(newPost)
   }
 
-  findAll() {
-    return `This action returns all publicaciones`;
+  /**
+   * findALL
+   * @param userId logged user
+   * @returns all posts
+   */
+  async findAll(userId: number) {
+    const friends = await this.usersService.findAllFriends(userId);
+
+    const friendsIds = friends.map((friend => friend.id));
+
+    const friendsPosts = await this.publicacionesRepository
+      .createQueryBuilder('publicaciones')
+      .where("publicaciones.userId IN (:...friendsIds)", { friendsIds })
+      .orderBy("publicaciones.id", "DESC")
+      .getMany()
+
+    const otherPosts = await this.publicacionesRepository
+      .createQueryBuilder('publicaciones')
+      .where("publicaciones.userId NOT IN (:...friendsIds)", { friendsIds })
+      .orderBy('publicaciones.id', 'DESC')
+      .getMany();
+
+    if (!friendsPosts.length || !otherPosts.length) {
+      throw new HttpException("There aren't Posts yet", HttpStatus.NOT_FOUND);
+    }
+    const posts = [...friendsPosts, ...otherPosts]
+    return posts;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} publicacione`;
+  /**
+   * Find one post 
+   * @param id from post that being searched
+   * @returns post with the given id 
+   * @throws {HttpException} if there is not post
+   */
+  async findOne(id: number) {
+    const publicacion = await this.publicacionesRepository.findOne({
+      where: { id: id.toString() },
+      relations: ['user'],
+    });
+
+    if (!publicacion) {
+      throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+    }
+    return publicacion;
   }
 
-  update(id: number, updatePublicacionesDto: UpdatePublicacionesDto) {
-    return `This action updates a #${id} publicacione`;
+  /**
+   * findByUser
+   * @param user is the id from users that have created post 
+   * @returns all posts that have been created for the given user
+   * @throws {HttpException} if the user not found 
+   */
+  async findByUser(userId: number) {
+    const userPosts = await this.publicacionesRepository
+      .createQueryBuilder('publicaciones')
+      .leftJoinAndSelect('publicaciones.user', 'users')
+      .where('users.id = :userId', { userId })
+      .orderBy('publicaciones.id', 'DESC')
+      .getMany();
+
+    if (!userPosts.length) {
+      throw new HttpException("user's posts not found", HttpStatus.NOT_FOUND);
+    }
+    return userPosts;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} publicacione`;
+  /**
+   * update
+   * @param id post id
+   * @param updatePublicacionesDto data to update post
+   * @param userId user id
+   * @returns post updated
+   * @throws {HttpException} if the post doesn't exists, if the user isn´t authorized, internal error.
+   */
+  async update(id: number, updatePublicacionesDto: UpdatePublicacionesDto, userId: number) {
+    const post = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+
+    if (!post) {
+      throw new HttpException("post doesn't exists. ", HttpStatus.NOT_FOUND);
+    }
+
+    if (post.user.id != userId) {
+      throw new HttpException("You don't unauthorization for update", HttpStatus.UNAUTHORIZED);
+    }
+
+    const updatePost = await this.publicacionesRepository.update(id, updatePublicacionesDto);
+    if (updatePost.affected === 0) {
+      throw new HttpException("The post was not updated.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * remove
+   * @param id id post
+   * @param userId user id
+   * @returns post deleted
+   * @throws {HttpException} if the post doesn't exists, if the user isn´t authorized, internal error.
+   */
+  async remove(id: number, userId: number) {
+    const post = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+
+    if (!post) {
+      throw new HttpException("The post doesn't exists", HttpStatus.NOT_FOUND);
+    }
+
+    if (post.user.id !== userId) {
+      throw new HttpException("You don't have authorization for this action.", HttpStatus.UNAUTHORIZED);
+    }
+
+    const deletePost = await this.publicacionesRepository.delete(id);
+    if (deletePost.affected === 0) {
+      throw new HttpException("The post was not deleted.", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
