@@ -69,6 +69,10 @@ export class PublicacionesService {
         .getMany()
     }
 
+    if (!friendsPosts && !otherPosts) {
+      return "no hay posts"
+    }
+
     const posts = [...friendsPosts, ...otherPosts]
 
     return posts;
@@ -121,7 +125,7 @@ export class PublicacionesService {
    * @throws {HttpException} if the post doesn't exists, if the user isn´t authorized, internal error.
    */
   async update(id: number, updatePublicacionesDto: UpdatePublicacionesDto, userId: number) {
-    const post = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+    const post = await this.findOne(id)
 
     if (!post) {
       throw new HttpException("post doesn't exists. ", HttpStatus.NOT_FOUND);
@@ -133,7 +137,7 @@ export class PublicacionesService {
 
     await this.publicacionesRepository.update(id, updatePublicacionesDto);
 
-    const updatePost = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+    const updatePost = await this.findOne(id)
 
     return updatePost;
   }
@@ -146,7 +150,7 @@ export class PublicacionesService {
    * @throws {HttpException} if the post doesn't exists, if the user isn´t authorized, internal error.
    */
   async remove(id: number, userId: number) {
-    const post = await this.publicacionesRepository.findOne({ where: { id: id.toString() } })
+    const post = await this.findOne(id)
 
     if (!post) {
       throw new HttpException("The post doesn't exists", HttpStatus.NOT_FOUND);

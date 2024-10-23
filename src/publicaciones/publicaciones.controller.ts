@@ -72,12 +72,12 @@ export class PublicacionesController {
   @IsPrivate()
   @ApiOperation({ summary: "Update a posts" })
   update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() updatePublicacionesDto: UpdatePublicacionesDto,
     @Request() req: any
   ) {
     const usuario = req.user
-    return this.publicacionesService.update(id, updatePublicacionesDto, usuario.id);
+    return this.publicacionesService.update(+id, updatePublicacionesDto, usuario.id);
   }
 
   /**
@@ -93,6 +93,6 @@ export class PublicacionesController {
     @Request() req: any
   ) {
     const usuario = req.user
-    return this.publicacionesService.remove(id, usuario.id);
+    return this.publicacionesService.remove(+id, usuario.id);
   }
 }
