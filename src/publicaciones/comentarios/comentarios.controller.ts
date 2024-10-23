@@ -14,32 +14,35 @@ export class ComentariosController {
         private readonly comentariosService: ComentariosService
     ) { }
 
-    @Post()
+    @Post(':post')
     @ApiOperation({ summary: 'Create a new comment' })
     create(
         @Body() createComentariosDto: CreateComentariosDto,
-        @Request() req: any
+        @Param('post') post: string,
+        @Request() req
     ) {
-        const post = req.postId
-        return this.comentariosService.create(post.id, createComentariosDto)
+        const userId = req.user;
+        console.log("userId", userId)
+        return this.comentariosService.create(createComentariosDto, +post, userId.id)
     }
 
     @Get(':postId')
     @ApiOperation({ summary: 'Get all comments from a post' })
-    findAll(
+    async findAll(
         @Param('postId') postId: string,
     ) {
         return this.comentariosService.findAllComments(+postId)
     }
 
-    @Delete(':id')
+    @Delete(':post/:commentId')
     @IsPrivate()
     @ApiOperation({ summary: 'Delete a comment' })
-    delete(
-        @Param('id') id: string,
+    async delete(
+        @Param('commentId') commentId: string,
+        @Param('post') post: number,
         @Request() req: any
     ) {
-        const usuario = req.usarioId
-        return this.comentariosService.deleteComment(id, usuario.id)
+        const usuario = req.user
+        return this.comentariosService.deleteComment(commentId, usuario.id, post)
     }
 }

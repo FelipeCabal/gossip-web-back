@@ -9,7 +9,7 @@ import { comentariosSchema } from "../comentarios/entities/comentarios.schema";
 export class publicacionesSchema {
 
     @Prop({
-        unique: true
+        required: true
     })
     publicacionId: number
 

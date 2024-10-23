@@ -7,11 +7,6 @@ import { mensajesSchema } from "./mensajes.schema";
 })
 export class chatsSchema {
 
-    @Prop({
-        unique: true
-    })
-    chatId: number
-
     @Prop()
     mensajes: mensajesSchema
 }
