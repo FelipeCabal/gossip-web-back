@@ -7,8 +7,8 @@ import { PublicacionesModule } from '../publicaciones.module';
 import { PublicacionesController } from '../publicaciones.controller';
 import { PublicacionesService } from '../publicaciones.service';
 import { UsersModule } from 'src/users/users.module';
-import { UsersController } from 'src/users/users.controller';
-import { UsersService } from 'src/users/users.service';
+import { UsersController } from 'src/users/controllers/users.controller';
+import { UsersService } from 'src/users/services/users.service';
 
 
 @Module({

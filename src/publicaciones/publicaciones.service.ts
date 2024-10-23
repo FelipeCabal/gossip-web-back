@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePublicacionesDto } from './dto/create-publicacione.dto';
 import { UpdatePublicacionesDto } from './dto/update-publicacione.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/users/services/users.service';
 import { Publicaciones } from './entities/publicaciones.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
