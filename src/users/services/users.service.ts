@@ -56,6 +56,7 @@ export class UsersService {
   }
 
   async findAllFriends(userId: number) {
+
     const friendsList = await this.userRepository
       .createQueryBuilder("user")
       .innerJoin(SolicitudAmistad, "solicitud", "solicitud.userEnvia = :userId OR solicitud.userRecibe = :userId", { userId })
