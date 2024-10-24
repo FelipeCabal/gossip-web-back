@@ -9,8 +9,8 @@ export class Publicaciones {
     @Column()
     description: string
 
-    @Column()
-    image: string
+    @Column({ nullable: true })
+    imagen: string
 
     @Column({ default: false })
     esAnonimo: boolean
