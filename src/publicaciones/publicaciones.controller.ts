@@ -89,7 +89,7 @@ export class PublicacionesController {
   @IsPrivate()
   @ApiOperation({ summary: "Delete a posts" })
   remove(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Request() req: any
   ) {
     const usuario = req.user

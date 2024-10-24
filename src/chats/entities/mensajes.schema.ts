@@ -7,14 +7,7 @@ import { Types } from "mongoose";
 export class mensajesSchema {
 
     @Prop({
-        unique: true,
-        type: Types.ObjectId,
-        default: () => new Types.ObjectId()
-    })
-    mensajeId: Types.ObjectId
-
-    @Prop({
-        unique: true
+        required: true
     })
     usuarioId: number
 

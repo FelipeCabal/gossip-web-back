@@ -4,6 +4,7 @@ import { comentariosSchema } from './entities/comentarios.schema';
 import { Model } from 'mongoose';
 import { CreateComentariosDto } from './dto/create-comentarios.dto';
 import { PublicacionesService } from '../publicaciones.service';
+import { UsersService } from 'src/users/services/users.service';
 
 
 @Injectable()
@@ -11,6 +12,7 @@ export class ComentariosService {
     constructor
         (
             private readonly publicacionesService: PublicacionesService,
+            private readonly usersService: UsersService,
             @InjectModel(comentariosSchema.name) private comentariosModel: Model<comentariosSchema>
         ) { }
 
@@ -20,7 +22,7 @@ export class ComentariosService {
      * @param createComentarioDto 
      * @returns 
      */
-    async create(postId: number, createComentarioDto: CreateComentariosDto) {
+    async create(createComentarioDto: CreateComentariosDto, postId: number, usuarioId: number) {
         const postToComment = await this.publicacionesService.findOne(postId);
 
         if (!postToComment) {
@@ -28,11 +30,13 @@ export class ComentariosService {
         }
 
         const newComment = new this.comentariosModel({
+            ...createComentarioDto,
             postId,
-            ...createComentarioDto
+            usuarioId
         });
+        const comment = await newComment.save();
 
-        return newComment.save();
+        return comment.toObject();
     }
 
     /**
@@ -42,7 +46,29 @@ export class ComentariosService {
      */
     async findAllComments(postId: number) {
         const comments = await this.comentariosModel.find({ postId }).exec();
-        return comments;
+
+        const comentario = await Promise.all(comments.map(async (comment) => {
+            const user = await this.usersService.findOneUser(comment.usuarioId);
+            return {
+                id: comment._id.toString(),
+                postId: comment.postId,
+                textoComentario: comment.comentario,
+                usuario: {
+                    id: user.id,
+                    nombre: user.nombre,
+                    email: user.email,
+                    fechaNto: user.fechaNto,
+                    sexo: user.sexo,
+                    pais: user.pais,
+                    imagenPerfil: user.imagen_perfil
+                }
+            }
+        }));
+
+        if (!comentario.length) {
+            return { message: "There are not comments yet." }
+        }
+        return comentario;
     }
 
     /**
@@ -51,22 +77,23 @@ export class ComentariosService {
      * @param userId 
      * @returns 
      */
-    async deleteComment(commentId: string, userId: number) {
+    async deleteComment(commentId: string, userId: number, postId: number) {
         const comment = await this.comentariosModel.findById(commentId);
         if (!comment) {
-            throw new HttpException('comment not found', HttpStatus.NOT_FOUND);
+            throw new HttpException("comment not found", HttpStatus.NOT_FOUND);
         }
 
-        const post = await this.publicacionesService.findOne(comment.postId);
+        const post = await this.publicacionesService.findOne(postId);
         if (!post) {
-            throw new HttpException('post not found', HttpStatus.NOT_FOUND);
+            throw new HttpException("post not found", HttpStatus.NOT_FOUND);
         }
-        const ownerComment = comment.usuarioId === userId;
-        const ownerPost = post.user.id === userId;
 
-        if (!ownerComment && !ownerPost) {
-            throw new HttpException('You dont have permission for this action', HttpStatus.UNAUTHORIZED);
+        if (comment.usuarioId !== userId && post.user.id !== userId) {
+            throw new HttpException("don't have authorization", HttpStatus.UNAUTHORIZED);
         }
-        return await this.comentariosModel.findByIdAndDelete(commentId);
+
+        await this.comentariosModel.findByIdAndDelete(commentId);
+
+        return { message: "Comment deleted successfylly" }
     }
 }

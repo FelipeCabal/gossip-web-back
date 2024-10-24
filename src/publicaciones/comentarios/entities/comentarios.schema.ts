@@ -6,16 +6,7 @@ import { Types } from "mongoose";
 })
 export class comentariosSchema {
 
-    @Prop({
-        unique: true,
-        type: Types.ObjectId,
-        default: () => new Types.ObjectId()
-    })
-    comentarioId: Types.ObjectId
-
-    @Prop({
-        unique: true,
-    })
+    @Prop({ required: true })
     usuarioId: number
 
     @Prop({

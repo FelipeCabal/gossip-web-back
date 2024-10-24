@@ -58,8 +58,8 @@ export class UsersService {
   async findAllFriends(userId: number) {
     const friendsList = await this.userRepository
       .createQueryBuilder("user")
-      .innerJoin(SolicitudAmistad, "solicitud", "solicitud.status = 'A' AND (solicitud.senderId = :userId OR solicitud.receiver:Id = :userId)", { userId })
-      .where("user.id != :userId", { userId })
+      .innerJoin(SolicitudAmistad, "solicitud", "solicitud.userEnvia = :userId OR solicitud.userRecibe = :userId", { userId })
+      .where("solicitud.status = 'A'")
       .getMany();
 
     if (!friendsList.length) {
