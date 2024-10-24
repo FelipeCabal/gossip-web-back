@@ -1,11 +1,12 @@
-import { IsBoolean, IsString } from "class-validator"
+import { IsBoolean, IsOptional, IsString } from "class-validator"
 
 export class CreatePublicacionesDto {
     @IsString()
     description: string
 
     @IsString()
-    image?: string
+    @IsOptional()
+    imagen?: string
 
     @IsBoolean()
     esAnonimo?: boolean

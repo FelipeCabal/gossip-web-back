@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import { UsersService } from '../services/users.service';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('users')
 @ApiTags('users')
+@UseGuards(AuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
@@ -17,10 +19,14 @@ export class UsersController {
     return this.usersService.createUser(createUser);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.usersService.findAll();
-  // }
+  @Get(':id/friends')
+  @ApiOperation({ summary: "Get all friends from an user" })
+  findAll(
+    @Request() req: any
+  ) {
+    const userId = req.user
+    return this.usersService.findAllFriends(userId.id);
+  }
 
 
   @Get(':id')
