@@ -53,18 +53,21 @@ export class PublicacionesService {
     if (friendsIds.length > 0) {
       friendsPosts = await this.publicacionesRepository
         .createQueryBuilder('publicaciones')
+        .leftJoinAndSelect('publicaciones.user', 'users')
         .where("publicaciones.userId IN (:...friendsIds)", { friendsIds })
         .orderBy("publicaciones.id", "DESC")
         .getMany()
 
       otherPosts = await this.publicacionesRepository
         .createQueryBuilder('publicaciones')
+        .leftJoinAndSelect('publicaciones.user', 'users')
         .where("publicaciones.userId NOT IN (:...friendsIds)", { friendsIds })
         .orderBy('publicaciones.id', 'DESC')
         .getMany();
     } else {
       otherPosts = await this.publicacionesRepository
         .createQueryBuilder('publicaciones')
+        .leftJoinAndSelect('publicaciones.user', 'users')
         .orderBy("publicaciones.id", "DESC")
         .getMany()
     }
