@@ -19,4 +19,4 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     logging: false,
 }
 
-export const mongooseConfigUri: string = process.env.MONGO_URI || 'mongodb://localhost:27017/mydatabase';
+export const mongooseConfigUri: string = process.env.MONGO_URL || 'mongodb://localhost:27017/mydatabase';
