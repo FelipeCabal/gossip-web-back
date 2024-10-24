@@ -22,7 +22,6 @@ export class ComentariosController {
         @Request() req
     ) {
         const userId = req.user;
-        console.log("userId", userId)
         return this.comentariosService.create(createComentariosDto, +post, userId.id)
     }
 

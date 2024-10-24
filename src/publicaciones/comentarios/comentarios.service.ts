@@ -4,6 +4,7 @@ import { comentariosSchema } from './entities/comentarios.schema';
 import { Model } from 'mongoose';
 import { CreateComentariosDto } from './dto/create-comentarios.dto';
 import { PublicacionesService } from '../publicaciones.service';
+import { UsersService } from 'src/users/services/users.service';
 
 
 @Injectable()
@@ -11,6 +12,7 @@ export class ComentariosService {
     constructor
         (
             private readonly publicacionesService: PublicacionesService,
+            private readonly usersService: UsersService,
             @InjectModel(comentariosSchema.name) private comentariosModel: Model<comentariosSchema>
         ) { }
 
@@ -45,12 +47,23 @@ export class ComentariosService {
     async findAllComments(postId: number) {
         const comments = await this.comentariosModel.find({ postId }).exec();
 
-        const comentario = comments.map(comment => ({
-            id: comment._id.toString(),
-            postId: comment.postId,
-            userId: comment.usuarioId,
-            textoComentario: comment.comentario,
-        }))
+        const comentario = await Promise.all(comments.map(async (comment) => {
+            const user = await this.usersService.findOneUser(comment.usuarioId);
+            return {
+                id: comment._id.toString(),
+                postId: comment.postId,
+                textoComentario: comment.comentario,
+                usuario: {
+                    id: user.id,
+                    nombre: user.nombre,
+                    email: user.email,
+                    fechaNto: user.fechaNto,
+                    sexo: user.sexo,
+                    pais: user.pais,
+                    imagenPerfil: user.imagen_perfil
+                }
+            }
+        }));
 
         if (!comentario.length) {
             return { message: "There are not comments yet." }
