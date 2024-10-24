@@ -62,9 +62,6 @@ export class UsersService {
       .where("solicitud.status = 'A'")
       .getMany();
 
-    if (!friendsList.length) {
-      throw new HttpException("without friends yet", HttpStatus.NOT_FOUND);
-    }
     return friendsList;
   }
 
