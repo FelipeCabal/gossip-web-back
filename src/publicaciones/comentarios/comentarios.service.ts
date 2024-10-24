@@ -65,9 +65,6 @@ export class ComentariosService {
             }
         }));
 
-        if (!comentario.length) {
-            return { message: "There are not comments yet." }
-        }
         return comentario;
     }
 
