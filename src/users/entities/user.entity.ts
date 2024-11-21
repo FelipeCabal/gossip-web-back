@@ -4,6 +4,7 @@ import { InvitacionesGrupos } from "src/chats/entities/invitaciones.entity";
 import { Publicaciones } from "src/publicaciones/entities/publicaciones.entity";
 import { Column, Entity, IsNull, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { SolicitudAmistad } from "./solicitud.entity";
+import { Like } from "src/likes/entities/like.entity";
 
 @Entity('users')
 export class User {
@@ -48,4 +49,7 @@ export class User {
 
     @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userRecibe)
     recibeSolicitudAmistad: SolicitudAmistad
+
+    @OneToMany(() => Like, (likes) => likes.user)
+    likes: Like[]
 }
