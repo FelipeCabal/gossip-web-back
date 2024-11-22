@@ -2,12 +2,18 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { SolicitudAmistad } from "../entities/solicitud.entity";
 import { UsersService } from "./users.service";
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { forwardRef, HttpException, HttpStatus, Inject } from "@nestjs/common";
 import { Status } from "src/config/enums/status.enum";
+import { PrivateChatsService } from "src/chats/services/private-chats.service";
 
 export class SolicitudesAmistadService {
     constructor(
+        @Inject(forwardRef(() => UsersService))
         private readonly usersService: UsersService,
+
+        @Inject(forwardRef(() => PrivateChatsService))
+        private readonly privateChatsService: PrivateChatsService,
+
         @InjectRepository(SolicitudAmistad)
         private readonly solicitudRepository: Repository<SolicitudAmistad>
     ) { }
@@ -87,8 +93,15 @@ export class SolicitudesAmistadService {
         }
 
         if (newStatus === Status.Aceptada) {
-            return this.solicitudRepository.update(
-                { id: requestId }, { status: Status.Aceptada });
+            const friendship = await this.privateChatsService.create(requestId)
+
+            if (friendship) {
+                return this.solicitudRepository.update(
+                    { id: requestId }, { status: Status.Aceptada });
+            }
+            else {
+                throw new HttpException("Internal server Error", HttpStatus.BAD_REQUEST)
+            }
         }
         if (newStatus === Status.Rechazada) {
             return this.solicitudRepository.update(
@@ -119,5 +132,16 @@ export class SolicitudesAmistadService {
             throw new HttpException("The request wasn't deleted", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return deleteRequest
+    }
+    async findOneRequestByIds(user1Id: number, user2Id: number) {
+        const request = await this.solicitudRepository
+            .createQueryBuilder('solicitud')
+            .where(
+                '(solicitud.userEnvia = :user1Id AND solicitud.userRecibe = :user2Id) OR (solicitud.userEnvia = :user2Id AND solicitud.userRecibe = :user1Id)',
+                { user1Id, user2Id }
+            )
+            .getOne();
+
+        return request;
     }
 }

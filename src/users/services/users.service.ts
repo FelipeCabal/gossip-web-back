@@ -1,18 +1,22 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { SALT_ROUNDS } from 'src/config/constants/bycript.constants';
 import { SolicitudAmistad } from '../entities/solicitud.entity';
+import { SolicitudesAmistadService } from './solicitudesAmistad.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+
+    @Inject(forwardRef(() => SolicitudesAmistadService))
+    private readonly solicitudAmistadServices: SolicitudesAmistadService,
   ) { }
 
   async createUser(createUser: CreateUserDto) {
@@ -32,7 +36,7 @@ export class UsersService {
 
     const userFriends = await this.findAllFriends(userId);
 
-    const friendsIds = userFriends.map((friend => friend.id));
+    const friendsIds = userFriends.map((friend) => friend.user.id);
 
     const searchFriendName = await this.userRepository
       .createQueryBuilder("user")
@@ -55,16 +59,38 @@ export class UsersService {
     return findUsersByName
   }
 
-  async findAllFriends(userId: number) {
-
+  async findAllFriends(userId: number): Promise<{ solicitudId: SolicitudAmistad; user: User }[]> {
     const friendsList = await this.userRepository
-      .createQueryBuilder("user")
-      .innerJoin(SolicitudAmistad, "solicitud", "solicitud.userEnvia = :userId OR solicitud.userRecibe = :userId", { userId })
-      .where("solicitud.status = 'A'")
-      .getMany();
+      .createQueryBuilder('user')
+      .innerJoinAndSelect(
+        'solicitudAmistad',
+        'solicitud',
+        '(solicitud.userEnvia = user.id OR solicitud.userRecibe = user.id) AND solicitud.status = :status',
+        { status: 'A' }
+      )
+      .where('user.id != :userId', { userId })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('solicitud.userEnvia = :userId', { userId })
+            .orWhere('solicitud.userRecibe = :userId', { userId });
+        })
+      )
+      .getMany(); // Cambié getRawAndEntities por getMany
 
-    return friendsList;
+    if (friendsList.length === 0) {
+      throw new HttpException("You don't have a friend list", HttpStatus.NOT_FOUND);
+    }
+
+    return await Promise.all(friendsList.map(async (friend) => {
+      const solicitud = await this.solicitudAmistadServices.findOneRequestByIds(userId, friend.id);
+
+      return {
+        solicitudId: solicitud,
+        user: friend // Usar el usuario relacionado
+      };
+    }));
   }
+
 
   async findOneUser(id: number) {
     const user = await this.userRepository.findOneBy({ id })

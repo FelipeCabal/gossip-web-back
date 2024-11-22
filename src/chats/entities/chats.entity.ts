@@ -6,7 +6,7 @@ import { SolicitudAmistad } from "src/users/entities/solicitud.entity";
 @Entity('chatsPrivados')
 export class ChatPrivado {
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
     @OneToOne(() => SolicitudAmistad)
     @JoinColumn()
@@ -19,7 +19,7 @@ export class ChatPrivado {
 @Entity('grupos')
 export class Grupos {
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
     @Column()
     nombre: string
@@ -38,7 +38,7 @@ export class Grupos {
 export class Comunidades {
 
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
     @Column()
     nombre: string
