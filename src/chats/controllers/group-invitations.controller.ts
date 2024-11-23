@@ -35,16 +35,20 @@ export class InvitationsGroupController {
     @ApiOperation({ summary: 'Accept a group invitation' })
     async acceptInvitation(
         @Param('invitationId', ParseIntPipe) invitationId: number,
+        @Request() req: any
     ): Promise<void> {
-        await this.groupInvitationsService.acceptInvitation(invitationId);
+        const userId = req.user.id
+        await this.groupInvitationsService.acceptInvitation(invitationId, userId);
     }
 
     @Delete(':invitationId/reject')
     @ApiOperation({ summary: 'Reject a group invitation' })
     async rejectInvitation(
         @Param('invitationId', ParseIntPipe) invitationId: number,
+        @Request() req: any
     ): Promise<void> {
-        await this.groupInvitationsService.rejectInvitation(invitationId);
+        const userId = req.user.id
+        await this.groupInvitationsService.rejectInvitation(invitationId, userId);
     }
 
 }

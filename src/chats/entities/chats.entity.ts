@@ -27,7 +27,7 @@ export class Grupos {
     @Column()
     descripcion: string
 
-    @Column()
+    @Column({ nullable: true })
     imagen: string
 
     @ManyToMany(() => User, (user) => user.grupos, { cascade: true })

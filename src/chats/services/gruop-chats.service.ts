@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Grupos } from '../entities/chats.entity';
 import { User } from 'src/users/entities/user.entity';
 import { createGrupoDto } from '../dto/GruposDto/create-grupos.dto';
 import { updateGruposDto } from '../dto/GruposDto/update-grupos.dto';
+import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()
 export class GroupChatsService {
@@ -12,20 +13,25 @@ export class GroupChatsService {
         @InjectRepository(Grupos)
         private readonly groupRepository: Repository<Grupos>,
 
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        private readonly usersServices: UsersService,
     ) { }
 
-    async create(createChatDto: createGrupoDto): Promise<Grupos> {
+    async create(createChatDto: createGrupoDto, userId: number): Promise<Grupos> {
         const newGroup = this.groupRepository.create(createChatDto);
-        return await this.groupRepository.save(newGroup);
+        const user = await this.usersServices.findOneUser(userId)
+
+        try {
+            await this.groupRepository.save(newGroup);
+            await this.addUserToGroup(newGroup.id, user)
+        } catch {
+            throw new HttpException("No fue posible agregar el usuario creador al grupo", HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+        return newGroup
     }
 
     async findAll(userId: number): Promise<Grupos[]> {
-        const user = await this.userRepository.findOne({
-            where: { id: userId },
-            relations: ['grupos'],
-        });
+        const user = await this.usersServices.findOneUser(userId)
 
         if (!user) {
             throw new NotFoundException('Usuario no encontrado.');

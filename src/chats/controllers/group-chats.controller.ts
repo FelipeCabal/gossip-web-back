@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AuthGuard } from "src/auth/guards/auth.guard";
 import { GroupChatsService } from "../services/gruop-chats.service";
@@ -15,9 +15,11 @@ export class GroupChatsController {
     @Post()
     @ApiOperation({ summary: 'Create Group' })
     create(
-        @Body() createChatDto: createGrupoDto
+        @Body() createChatDto: createGrupoDto,
+        @Request() req: any
     ) {
-        return this.groupChatsService.create(createChatDto)
+        const userId = req.user.id
+        return this.groupChatsService.create(createChatDto, userId)
     }
 
     @Get()
@@ -33,7 +35,7 @@ export class GroupChatsController {
         return this.groupChatsService.findGroupById(id);
     }
 
-    @Put(':id')
+    @Patch(':id')
     @ApiOperation({ summary: "Update a group chat" })
     async updateGroup(
         @Param('id', ParseIntPipe) id: number,

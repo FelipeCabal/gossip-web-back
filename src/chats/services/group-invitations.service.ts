@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { InvitacionesGrupos } from '../entities/invitaciones.entity';
@@ -22,13 +22,21 @@ export class GroupInvitationsService {
         const receiver = await this.usersService.findOneUser(receiverId);
 
         if (senderId === receiverId) {
-            throw new Error('No puedes invitarte a ti mismo.');
+            throw new HttpException("No puedes invitarte a ti mismo", HttpStatus.BAD_REQUEST);
         }
 
         const group = await this.groupService.findGroupById(groupId);
 
         if (group.miembros.some((miembro) => miembro.id === receiverId)) {
-            throw new Error('El usuario ya pertenece al grupo.');
+            throw new HttpException("User already in group", HttpStatus.BAD_REQUEST)
+        }
+
+        const invitation = await this.groupInvitationRepository.findOne({
+            where: { user: receiver, grupo: group }
+        });
+
+        if (invitation && invitation.status == Status.Pendiente) {
+            throw new HttpException("Invitation already exist", HttpStatus.BAD_REQUEST)
         }
 
         const newInvitation = this.groupInvitationRepository.create({
@@ -40,7 +48,7 @@ export class GroupInvitationsService {
         return await this.groupInvitationRepository.save(newInvitation);
     }
 
-    async acceptInvitation(invitationId: number): Promise<void> {
+    async acceptInvitation(invitationId: number, userId: number): Promise<void> {
         const invitation = await this.groupInvitationRepository.findOne({
             where: { id: invitationId },
             relations: ['grupo', 'user'],
@@ -51,7 +59,11 @@ export class GroupInvitationsService {
         }
 
         if (invitation.status !== Status.Pendiente) {
-            throw new Error('La invitación ya fue procesada.');
+            throw new HttpException("La invitacion ya ha sido procesada", HttpStatus.BAD_REQUEST)
+        }
+
+        if (userId !== invitation.user.id) {
+            throw new HttpException("No estas autorizado para hacer esta accion", HttpStatus.UNAUTHORIZED)
         }
 
         invitation.status = Status.Aceptada;
@@ -60,26 +72,32 @@ export class GroupInvitationsService {
         try {
             await this.groupService.addUserToGroup(invitation.grupo.id, invitation.user);
         } catch (error) {
-            throw new Error(`Error al agregar usuario al grupo: ${error.message}`);
+            throw new HttpException("Error al intentar agregar el usuario al grupo", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    async rejectInvitation(invitationId: number): Promise<void> {
+    async rejectInvitation(invitationId: number, userId: number): Promise<void> {
         const invitation = await this.groupInvitationRepository.findOne({
             where: { id: invitationId },
-        });
+            relations: ['user']
+        })
 
         if (!invitation) {
             throw new NotFoundException('Invitación no encontrada.');
+        }
+
+        if (userId !== invitation.user.id) {
+            throw new HttpException("No estas autorizado para hacer esta accion", HttpStatus.UNAUTHORIZED)
         }
 
         await this.groupInvitationRepository.remove(invitation);
     }
 
     async findUserInvitations(userId: number): Promise<InvitacionesGrupos[]> {
+        const user = await this.usersService.findOneUser(userId)
         return await this.groupInvitationRepository.find({
-            where: { user: { id: userId } },
-            relations: ['grupo', 'user'],
+            where: { user: user },
+            relations: ['grupo'],
         })
     }
 }
