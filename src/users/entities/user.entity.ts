@@ -40,12 +40,12 @@ export class User {
     @JoinTable()
     comunidades: Comunidades[]
 
-    @OneToMany(() => InvitacionesGrupos, (invitacionesGrupos) => invitacionesGrupos.user)
-    grupos: InvitacionesGrupos[]
-
     @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userEnvia)
     enviaSolicitudAmistad: SolicitudAmistad
 
     @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userRecibe)
     recibeSolicitudAmistad: SolicitudAmistad
+
+    @ManyToMany(() => Grupos, (grupo) => grupo.miembros)
+    grupos: Grupos[];
 }

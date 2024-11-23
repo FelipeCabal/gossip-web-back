@@ -10,14 +10,14 @@ export class PrivateChatsController {
     constructor(private readonly privateChatsService: PrivateChatsService) { }
 
     @Get()
-    @ApiOperation({ summary: 'Get all the groups or communities' })
+    @ApiOperation({ summary: 'Get all users private chats' })
     findAllPrivateChats(@Request() req: any) {
         const userId = req.user.id
         return this.privateChatsService.findAllUserChats(userId);
     }
 
     @Get(':id')
-    @ApiOperation({ summary: "Get a chat" })
+    @ApiOperation({ summary: "Get a private chat" })
     findOne(@Param('id') id: string) {
         return this.privateChatsService.findOne(+id);
     }

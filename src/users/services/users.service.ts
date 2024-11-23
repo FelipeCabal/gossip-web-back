@@ -75,7 +75,7 @@ export class UsersService {
             .orWhere('solicitud.userRecibe = :userId', { userId });
         })
       )
-      .getMany(); // Cambié getRawAndEntities por getMany
+      .getMany()
 
     if (friendsList.length === 0) {
       throw new HttpException("You don't have a friend list", HttpStatus.NOT_FOUND);
@@ -86,7 +86,7 @@ export class UsersService {
 
       return {
         solicitudId: solicitud,
-        user: friend // Usar el usuario relacionado
+        user: friend
       };
     }));
   }

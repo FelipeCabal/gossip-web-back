@@ -1,19 +1,23 @@
-import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Grupos } from "./chats.entity";
-import { Status } from "src/config/enums/status.enum";
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Grupos } from './chats.entity';
+import { Status } from 'src/config/enums/status.enum';
 
 @Entity('invitacionesGrupos')
 export class InvitacionesGrupos {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
-    @ManyToOne(() => User, user => user.grupos)
-    user: User
+    @ManyToOne(() => User, (user) => user.grupos, { onDelete: 'CASCADE' })
+    user: User;
 
-    @ManyToOne(() => Grupos, grupos => grupos.user)
-    grupo: Grupos
+    @ManyToOne(() => Grupos, (grupo) => grupo.invitaciones, { onDelete: 'CASCADE', eager: true })
+    grupo: Grupos;
 
-    @Column()
-    status: Status
+    @Column({
+        type: 'enum',
+        enum: Status,
+        default: Status.Pendiente,
+    })
+    status: Status;
 }
