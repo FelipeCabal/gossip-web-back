@@ -24,13 +24,13 @@ export class UsersService {
     createUser.password = bcrypt.hashSync(createUser.password, SALT_ROUNDS)
     const exists = await this.userRepository.findOne({
       where: { email: createUser.email }
-    })
+    });
     if (exists) {
       throw new HttpException('user already exist', HttpStatus.CONFLICT)
-    }
-    const user = await this.userRepository.save(createUser)
+    };
+    const user = await this.userRepository.save(createUser);
 
-    return user
+    return user;
   }
 
   async findAllUsers(userId: number, userQueries: UserQueries): Promise<User[]> {
