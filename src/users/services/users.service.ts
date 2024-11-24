@@ -89,7 +89,7 @@ export class UsersService {
       .getMany()
 
     if (friendsList.length === 0) {
-      throw new HttpException("You don't have a friend list", HttpStatus.NOT_FOUND);
+      return []
     }
 
     return await Promise.all(friendsList.map(async (friend) => {
