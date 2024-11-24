@@ -13,8 +13,8 @@ export class MessagesService {
     ) { }
 
     // Crear un nuevo mensaje y asociarlo al usuario
-    async createMessage(createMessageDto: CreateMessageDto): Promise<Mensajes> {
-        const { mensaje, chatId, chatType, usuarioId } = createMessageDto;
+    async createMessage(createMessageDto: CreateMessageDto): Promise<Partial<Mensajes>> {
+        const { message, chatId, chatType, usuarioId } = createMessageDto;
 
         // Verificar si el usuario existe
         const user = await this.usersService.findOneUser(usuarioId); // Usamos el usuarioId que llega en el request
@@ -23,27 +23,38 @@ export class MessagesService {
         }
 
         // Crear el mensaje
-        const newMessage = new this.mensajeModel({
+        const newMessage = await new this.mensajeModel({
             usuarioId,
-            mensaje,
+            message,
             chatId,
             chatType,
-        });
+        }).save();
 
-        // Guardar el mensaje en la base de datos
-        return await newMessage.save();
+        const { _id, createdAt, updatedAt } = newMessage.toObject();
+        return {
+            id: _id.toString(), usuarioId, message, chatId, chatType, createdAt, updatedAt
+        };
     }
 
     // Obtener mensajes por chatId y chatType
-    async findMessagesByChatId(chatId: string, chatType: string): Promise<Mensajes[]> {
+    async findMessagesByChatId(chatId: number, chatType: string): Promise<Partial<Mensajes>[]> {
         const messages = await this.mensajeModel
             .find({ chatId, chatType })
+            .lean()
             .exec();
 
         if (!messages.length) {
             throw new NotFoundException('No messages found for this chat.');
         }
 
-        return messages;
+        return messages.map(({ _id, usuarioId, message, chatId, chatType, createdAt, updatedAt }) => ({
+            id: _id.toString(),
+            usuarioId,
+            message,
+            chatId,
+            chatType,
+            createdAt,
+            updatedAt,
+        }));
     }
 }

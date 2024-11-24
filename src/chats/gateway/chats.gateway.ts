@@ -1,71 +1,62 @@
-import {
-    WebSocketGateway,
-    SubscribeMessage,
-    MessageBody,
-    ConnectedSocket,
-    OnGatewayInit,
-} from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, ConnectedSocket, OnGatewayInit, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
 import { MessagesService } from '../services/mensajes.service';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { CreateMessageDto } from '../dto/mensajesDto/create-mensaje.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
-    cors: {
-        origin: '*', // Cambiar en producción para permitir solo ciertos orígenes
-        credentials: true,
-    },
+    cors: { origin: '*' },
+    methods: ['GET', 'POST'],
+    transports: ['websocket'],
 })
 export class MessagesGateway implements OnGatewayInit {
-    @WebSocketServer()
-    server: Server;
+    private server: Server;
 
-    constructor(private readonly messagesService: MessagesService) { }
+    constructor(
+        private readonly messagesService: MessagesService,
+        private readonly jwtService: JwtService
+    ) { }
 
-    // Inicializa el servidor de WebSockets
     afterInit(server: Server) {
         this.server = server;
-        console.log('WebSocket Server initialized');
+
+        this.server.use((socket, next) => {
+            const token = socket.handshake.headers.authorization;
+            try {
+                const user = this.jwtService.verify(token.replace('Bearer ', ''));
+                socket.data.user = user;
+                next();
+            } catch (err) {
+                next(new Error('Unauthorized'));
+            }
+        });
     }
 
-    @UseGuards(AuthGuard)
-    @SubscribeMessage('sendMessage')
-    async handleSendMessage(
-        @MessageBody() createMessageDto: CreateMessageDto,
-        @ConnectedSocket() client: Socket,
-    ): Promise<void> {
-        const user = client.handshake.headers['user']; // Obtén el usuario del contexto (puede requerir ajuste en AuthGuard)
-
-        // Agregar usuarioId al mensaje
-        const messageData = {
-            ...createMessageDto,
-            usuarioId: user?.id, // Ajustar según tu lógica del usuario
-        };
-
-        // Guardar mensaje en la base de datos
-        const message = await this.messagesService.createMessage(messageData);
-
-        // Emitir mensaje al room correspondiente (chatType + chatId)
-        const roomName = `${createMessageDto.chatType}:${createMessageDto.chatId}`;
-        this.server.to(roomName).emit('messageReceived', message);
-
-        console.log('Mensaje enviado:', message);
-    }
-
-    @UseGuards(AuthGuard)
     @SubscribeMessage('joinChat')
     handleJoinChat(
-        @MessageBody() data: { chatType: string; chatId: string },
-        @ConnectedSocket() client: Socket,
+        @MessageBody() { chatId, chatType }: { chatId: string, chatType: string },
+        @ConnectedSocket() client: Socket
     ): void {
-        const { chatType, chatId } = data;
-
-        // Crear el nombre del room
         const roomName = `${chatType}:${chatId}`;
 
-        // Unir al usuario al room
         client.join(roomName);
+
         console.log(`Usuario ${client.id} se unió al chat ${roomName}`);
+    }
+
+    @SubscribeMessage('sendMessage')
+    async handleSendMessage(
+        @MessageBody() createMessageDto: { chatId: number; chatType: string; message: string },
+        @ConnectedSocket() client: Socket
+    ): Promise<void> {
+        const user = client.data.user;
+        const message = await this.messagesService.createMessage({
+            usuarioId: user.id,
+            message: createMessageDto.message,
+            chatId: createMessageDto.chatId,
+            chatType: createMessageDto.chatType,
+        });
+
+        this.server.to(`${createMessageDto.chatType}:${createMessageDto.chatId}`).emit('messageReceived', message);
+        console.log('Mensaje enviado:', message);
     }
 }

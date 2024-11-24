@@ -14,7 +14,9 @@ async function bootstrap() {
 
   app.use(morgan(configService.get('ENVIRONMENT', 'combined')));
   app.setGlobalPrefix('api');
-  app.enableCors(CORS);
+  app.enableCors({
+    origin: '*',
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

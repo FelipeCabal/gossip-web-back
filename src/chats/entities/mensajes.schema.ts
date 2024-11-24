@@ -7,13 +7,16 @@ export class Mensajes extends Document {
     usuarioId: number;
 
     @Prop({ required: true, trim: true })
-    mensaje: string;
+    message: string;
 
     @Prop({ required: true })
-    chatId: string;
+    chatId: number;
 
     @Prop({ required: true })
     chatType: string; // Tipo de chat: 'private', 'group', 'community'
+
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export const MensajesSchema = SchemaFactory.createForClass(Mensajes);
