@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator"
+import { IsNotEmpty, IsOptional, IsString } from "class-validator"
 
 export class createGrupoDto {
     @IsString()
@@ -6,6 +6,11 @@ export class createGrupoDto {
     nombre: string
 
     @IsString()
-    descripcion: string
+    @IsOptional()
+    descripcion?: string
+
+    @IsString()
+    @IsOptional()
+    imagen?: string
 
 }

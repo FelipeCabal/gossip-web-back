@@ -1,14 +1,15 @@
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryColumnCannotBeNullableError, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryColumnCannotBeNullableError, PrimaryGeneratedColumn } from "typeorm";
 import { InvitacionesGrupos } from "./invitaciones.entity";
 import { SolicitudAmistad } from "src/users/entities/solicitud.entity";
+import { MiembrosComunidades } from "./miembrosComunidad.entity";
 
 @Entity('chatsPrivados')
 export class ChatPrivado {
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
-    @OneToOne(() => SolicitudAmistad)
+    @OneToOne(() => SolicitudAmistad, (solicitud) => solicitud.chatPrivado, { onDelete: 'CASCADE' })
     @JoinColumn()
     amistad: SolicitudAmistad
 
@@ -19,36 +20,40 @@ export class ChatPrivado {
 @Entity('grupos')
 export class Grupos {
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
     @Column()
     nombre: string
 
-    @Column()
+    @Column({ nullable: true })
     descripcion: string
 
-    @Column()
+    @Column({ nullable: true })
     imagen: string
 
-    @OneToMany(() => InvitacionesGrupos, (invitacionesGrupos) => invitacionesGrupos.grupo)
-    user: InvitacionesGrupos[]
+    @ManyToMany(() => User, (user) => user.grupos, { cascade: true })
+    @JoinTable()
+    miembros: User[];
+
+    @OneToMany(() => InvitacionesGrupos, (invitacion) => invitacion.grupo, { cascade: true })
+    invitaciones: InvitacionesGrupos[]
 }
 
 @Entity('comunidades')
 export class Comunidades {
 
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
     @Column()
     nombre: string
 
-    @Column()
+    @Column({ nullable: true })
     descripcion: string
 
-    @Column()
+    @Column({ nullable: true })
     imagen: string
 
-    @ManyToMany(() => User, (user) => user.comunidades)
-    user: User[]
+    @OneToMany(() => MiembrosComunidades, (miembro) => miembro.comunidad, { cascade: true })
+    miembros: MiembrosComunidades[];
 }
