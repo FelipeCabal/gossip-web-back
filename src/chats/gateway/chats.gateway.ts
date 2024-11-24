@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 @WebSocketGateway({
     cors: { origin: '*' },
     methods: ['GET', 'POST'],
+    allowedHeaders: ['Authorization'], // Permitir el header `Authorization`
     transports: ['websocket'],
 })
 export class MessagesGateway implements OnGatewayInit {
@@ -29,6 +30,9 @@ export class MessagesGateway implements OnGatewayInit {
                 next(new Error('Unauthorized'));
             }
         });
+    }
+    handleConnection(client: any) {
+        console.log('Headers del cliente:', client.handshake.headers);
     }
 
     @SubscribeMessage('joinChat')
