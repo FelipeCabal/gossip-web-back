@@ -22,7 +22,7 @@ import { ComentariosModule } from './publicaciones/comentarios/comentarios.modul
     ChatsModule,
     UsersModule,
     AuthModule,
-    ComentariosModule
+    ComentariosModule,
   ],
   controllers: [AppController,],
   providers: [AppService,],

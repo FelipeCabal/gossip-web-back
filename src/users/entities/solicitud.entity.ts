@@ -20,6 +20,6 @@ export class SolicitudAmistad {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     fecha: Date
 
-    @OneToOne(() => ChatPrivado)
+    @OneToOne(() => ChatPrivado, (chatPrivado) => chatPrivado.amistad, { cascade: true, onDelete: 'CASCADE' })
     chatPrivado: ChatPrivado
 }

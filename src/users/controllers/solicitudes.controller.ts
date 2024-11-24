@@ -7,7 +7,7 @@ import { Status } from "src/config/enums/status.enum";
 @Controller('friend-request')
 @ApiTags('solicitudes de amistad')
 @UseGuards(AuthGuard)
-export class solicitudesController {
+export class SolicitudesController {
     constructor(
         private readonly solicitudesAmistadService: SolicitudesAmistadService
     ) { }

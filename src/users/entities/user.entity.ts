@@ -4,6 +4,7 @@ import { InvitacionesGrupos } from "src/chats/entities/invitaciones.entity";
 import { Publicaciones } from "src/publicaciones/entities/publicaciones.entity";
 import { Column, Entity, IsNull, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { SolicitudAmistad } from "./solicitud.entity";
+import { MiembrosComunidades } from "src/chats/entities/miembrosComunidad.entity";
 
 @Entity('users')
 export class User {
@@ -36,16 +37,15 @@ export class User {
     @OneToMany(() => Publicaciones, (publicaciones) => publicaciones.user)
     publicaciones: Publicaciones[]
 
-    @ManyToMany(() => Comunidades, (comunidades) => comunidades.user)
-    @JoinTable()
-    comunidades: Comunidades[]
-
-    @OneToMany(() => InvitacionesGrupos, (invitacionesGrupos) => invitacionesGrupos.user)
-    grupos: InvitacionesGrupos[]
+    @OneToMany(() => MiembrosComunidades, (miembro) => miembro.usuario)
+    comunidades: MiembrosComunidades[];
 
     @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userEnvia)
     enviaSolicitudAmistad: SolicitudAmistad
 
     @OneToMany(() => SolicitudAmistad, solicitudAmistad => solicitudAmistad.userRecibe)
     recibeSolicitudAmistad: SolicitudAmistad
+
+    @ManyToMany(() => Grupos, (grupo) => grupo.miembros)
+    grupos: Grupos[];
 }
