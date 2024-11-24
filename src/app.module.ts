@@ -23,8 +23,7 @@ import { LikesModule } from './likes/likes.module';
     ChatsModule,
     UsersModule,
     AuthModule,
-    ComentariosModule,
-    LikesModule
+    ComentariosModule
   ],
   controllers: [AppController,],
   providers: [AppService,],
