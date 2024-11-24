@@ -17,6 +17,7 @@ import { ComunidadesController } from './controllers/comunity-chats.controller';
 import { MiembrosComunidades } from './entities/miembrosComunidad.entity';
 import { MessagesService } from './services/mensajes.service';
 import { MensajesController } from './controllers/mensajes.controller';
+import { MessagesGateway } from './gateway/chats.gateway';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { MensajesController } from './controllers/mensajes.controller';
     ]),
   ],
   controllers: [PrivateChatsController, InvitationsGroupController, GroupChatsController, ComunidadesController, MensajesController],
-  providers: [PrivateChatsService, GroupInvitationsService, GroupChatsService, ComunidadesService, MessagesService],
+  providers: [PrivateChatsService, GroupInvitationsService, GroupChatsService, ComunidadesService, MessagesService, MessagesGateway],
   exports: [TypeOrmModule, MongooseModule, PrivateChatsService]
 })
 export class ChatsModule { }

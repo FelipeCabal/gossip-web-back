@@ -40,7 +40,7 @@ export class MessagesGateway implements OnGatewayInit {
 
         client.join(roomName);
 
-        console.log(`Usuario ${client.id} se unió al chat ${roomName}`);
+        console.log(`Usuario ${client.data.user.id} se unió al chat ${roomName}`);
     }
 
     @SubscribeMessage('sendMessage')
