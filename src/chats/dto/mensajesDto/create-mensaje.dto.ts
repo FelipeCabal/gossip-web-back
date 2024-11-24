@@ -1,14 +1,20 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
 
-export class createMensajeDto {
-    @IsString()
-    @IsNotEmpty()
-    chatId: string;
+export class CreateMessageDto {
 
     @IsString()
     @IsNotEmpty()
-    chatType: string; // "private", "group", "community"
+    mensaje: string;    // El contenido del mensaje
 
     @IsString()
-    mensaje: string
+    @IsNotEmpty()
+    chatId: string;     // ID del chat (privado, grupal, comunidad)
+
+    @IsString()
+    @IsNotEmpty()
+    chatType: string;   // Tipo de chat: 'private', 'group', 'community'
+
+    @IsNumber()
+    @IsNotEmpty()
+    usuarioId: number; // Asegúrate de que esta propiedad esté aquí
 }

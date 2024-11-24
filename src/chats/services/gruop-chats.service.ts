@@ -6,6 +6,7 @@ import { User } from 'src/users/entities/user.entity';
 import { createGrupoDto } from '../dto/GruposDto/create-grupos.dto';
 import { updateGruposDto } from '../dto/GruposDto/update-grupos.dto';
 import { UsersService } from 'src/users/services/users.service';
+import { ComunityAndGroupQueries } from '../dto/queries/comunities-queries.dto';
 
 @Injectable()
 export class GroupChatsService {
@@ -30,14 +31,34 @@ export class GroupChatsService {
         return newGroup
     }
 
-    async findAll(userId: number): Promise<Grupos[]> {
-        const user = await this.usersServices.findOneUser(userId)
+    async findAllGroups(userId: number, GroupQueries: ComunityAndGroupQueries): Promise<Grupos[]> {
+        const user = await this.usersServices.findOneUser(userId);
 
         if (!user) {
             throw new NotFoundException('Usuario no encontrado.');
         }
 
-        return user.grupos;
+        let grupos = user.grupos;
+
+        if (GroupQueries.search) {
+            grupos = grupos.filter(
+                (grupo) =>
+                    grupo.nombre.toLowerCase().includes(GroupQueries.search.toLowerCase()) ||
+                    grupo.descripcion.toLowerCase().includes(GroupQueries.search.toLowerCase())
+            );
+        }
+
+        grupos = grupos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+        if (GroupQueries.limit && Number.isInteger(GroupQueries.limit)) {
+            grupos = grupos.slice(0, GroupQueries.limit);
+        }
+
+        if (grupos.length === 0) {
+            throw new HttpException('No se encontraron grupos para el usuario.', HttpStatus.NOT_FOUND);
+        }
+
+        return grupos;
     }
 
     async findGroupById(id: number): Promise<Grupos> {

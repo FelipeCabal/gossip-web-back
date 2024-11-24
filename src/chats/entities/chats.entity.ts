@@ -2,6 +2,7 @@ import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryColumnCannotBeNullableError, PrimaryGeneratedColumn } from "typeorm";
 import { InvitacionesGrupos } from "./invitaciones.entity";
 import { SolicitudAmistad } from "src/users/entities/solicitud.entity";
+import { MiembrosComunidades } from "./miembrosComunidad.entity";
 
 @Entity('chatsPrivados')
 export class ChatPrivado {
@@ -24,7 +25,7 @@ export class Grupos {
     @Column()
     nombre: string
 
-    @Column()
+    @Column({ nullable: true })
     descripcion: string
 
     @Column({ nullable: true })
@@ -47,12 +48,12 @@ export class Comunidades {
     @Column()
     nombre: string
 
-    @Column()
+    @Column({ nullable: true })
     descripcion: string
 
-    @Column()
+    @Column({ nullable: true })
     imagen: string
 
-    @ManyToMany(() => User, (user) => user.comunidades)
-    user: User[]
+    @OneToMany(() => MiembrosComunidades, (miembro) => miembro.comunidad, { cascade: true })
+    miembros: MiembrosComunidades[];
 }

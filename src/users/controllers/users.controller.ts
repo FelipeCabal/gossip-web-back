@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, Query } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { UserQueries } from '../dto/querie.dto';
 
 @Controller('users')
 @ApiTags('users')
@@ -11,6 +12,14 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
+  @Get()
+  async findAllUsers(
+    @Request() req: any,
+    @Query() userQueries: UserQueries,
+  ) {
+    const userId = req.user.id;
+    return this.usersService.findAllUsers(userId, userQueries);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Create a new User' })

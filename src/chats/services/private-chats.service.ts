@@ -1,9 +1,10 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatPrivado } from '../entities/chats.entity';
 import { Repository } from 'typeorm';
 import { SolicitudesAmistadService } from 'src/users/services/solicitudesAmistad.service';
 import { UsersService } from 'src/users/services/users.service';
+import { ComunityAndGroupQueries } from '../dto/queries/comunities-queries.dto';
 
 
 @Injectable()
@@ -42,29 +43,56 @@ export class PrivateChatsService {
         }
     }
 
-    async findAllUserChats(userId: number) {
+    async findAllUserChats(userId: number, ChatQueries: ComunityAndGroupQueries): Promise<any[]> {
         const friendships = await this.usersServices.findAllFriends(userId);
 
-        const friendShipsIds = friendships.map((friendship) => (friendship.solicitudId.id))
+        if (!friendships || friendships.length === 0) {
+            throw new NotFoundException('El usuario no tiene amigos con chats privados.');
+        }
 
-        const privateChats = await this.privateChatsRepository
+        const friendshipIds = friendships.map((friendship) => friendship.solicitudId.id);
+
+        let privateChats = await this.privateChatsRepository
             .createQueryBuilder('privateChat')
             .leftJoinAndSelect('privateChat.amistad', 'amistad')
-            .where('privateChat.amistad in (:...friendShipsIds)', { friendShipsIds })
-            .getMany()
+            .leftJoinAndSelect('amistad.userEnvia', 'userEnvia')
+            .leftJoinAndSelect('amistad.userRecibe', 'userRecibe')
+            .where('privateChat.amistad.id IN (:...friendshipIds)', { friendshipIds })
+            .getMany();
 
-        const chatsList = friendships.flatMap((friendship) => {
+        let chatsList = friendships.flatMap((friendship) => {
             return privateChats
                 .filter((chat) => chat.amistad.id === friendship.solicitudId.id)
-                .map((chat) => ({
-                    id: chat.id,
-                    createAt: chat.createAt,
-                    friend: friendship.user,
-                }))
-        })
+                .map((chat) => {
 
-        return chatsList
+                    return {
+                        id: chat.id,
+                        createdAt: chat.createAt,
+                        friendName: friendship.user.nombre,
+                        friendId: friendship.user.id,
+                    };
+                });
+        });
+
+        if (ChatQueries.search) {
+            chatsList = chatsList.filter((chat) =>
+                chat.friendName.toLowerCase().includes(ChatQueries.search.toLowerCase())
+            );
+        }
+
+        chatsList = chatsList.sort((a, b) => a.friendName.localeCompare(b.friendName));
+
+        if (ChatQueries.limit && Number.isInteger(ChatQueries.limit)) {
+            chatsList = chatsList.slice(0, ChatQueries.limit);
+        }
+
+        if (chatsList.length === 0) {
+            throw new HttpException('No se encontraron chats privados para este usuario.', HttpStatus.NOT_FOUND);
+        }
+
+        return chatsList;
     }
+
 
     async findOne(id: number): Promise<ChatPrivado> {
         try {

@@ -1,64 +1,71 @@
 import {
     WebSocketGateway,
-    WebSocketServer,
-    OnGatewayInit,
-    OnGatewayConnection,
-    OnGatewayDisconnect,
     SubscribeMessage,
     MessageBody,
     ConnectedSocket,
+    OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { UseGuards } from '@nestjs/common';
+import { MessagesService } from '../services/mensajes.service';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { CreateMessageDto } from '../dto/mensajesDto/create-mensaje.dto';
 
-@WebSocketGateway({ namespace: 'chats' })
-export class ChatsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({
+    cors: {
+        origin: '*', // Cambiar en producción para permitir solo ciertos orígenes
+        credentials: true,
+    },
+})
+export class MessagesGateway implements OnGatewayInit {
     @WebSocketServer()
     server: Server;
 
-    private activeUsers = new Map<string, Socket>();
+    constructor(private readonly messagesService: MessagesService) { }
 
+    // Inicializa el servidor de WebSockets
     afterInit(server: Server) {
-        console.log('Gateway inicializado');
+        this.server = server;
+        console.log('WebSocket Server initialized');
     }
 
-    handleConnection(client: Socket) {
-        const userId = client.handshake.query.userId as string;
-        const chatId = client.handshake.query.chatId as string;
-        const chatType = client.handshake.query.chatType as string; // private, group, community
-
-        if (userId && chatId && chatType) {
-            const roomName = `${chatType}-${chatId}`;
-            client.join(roomName); // Une al cliente a la sala específica
-            console.log(`Usuario ${userId} conectado a la sala ${roomName}`);
-        } else {
-            console.error('Conexión rechazada: falta userId, chatId o chatType');
-            client.disconnect();
-        }
-    }
-
-    handleDisconnect(client: Socket) {
-        const userId = [...this.activeUsers.entries()].find(
-            ([, socket]) => socket.id === client.id,
-        )?.[0];
-
-        if (userId) {
-            this.activeUsers.delete(userId);
-            console.log(`Usuario ${userId} desconectado`);
-        }
-    }
-
+    @UseGuards(AuthGuard)
     @SubscribeMessage('sendMessage')
-    handleSendMessage(
-        @MessageBody()
-        data: { chatId: string; chatType: string; senderId: string; content: string },
+    async handleSendMessage(
+        @MessageBody() createMessageDto: CreateMessageDto,
         @ConnectedSocket() client: Socket,
-    ) {
-        const roomName = `${data.chatType}-${data.chatId}`;
-        console.log(`Mensaje recibido para la sala ${roomName}:`, data);
+    ): Promise<void> {
+        const user = client.handshake.headers['user']; // Obtén el usuario del contexto (puede requerir ajuste en AuthGuard)
 
-        this.server.to(roomName).emit('receiveMessage', {
-            ...data,
-            timestamp: new Date(),
-        });
+        // Agregar usuarioId al mensaje
+        const messageData = {
+            ...createMessageDto,
+            usuarioId: user?.id, // Ajustar según tu lógica del usuario
+        };
+
+        // Guardar mensaje en la base de datos
+        const message = await this.messagesService.createMessage(messageData);
+
+        // Emitir mensaje al room correspondiente (chatType + chatId)
+        const roomName = `${createMessageDto.chatType}:${createMessageDto.chatId}`;
+        this.server.to(roomName).emit('messageReceived', message);
+
+        console.log('Mensaje enviado:', message);
+    }
+
+    @UseGuards(AuthGuard)
+    @SubscribeMessage('joinChat')
+    handleJoinChat(
+        @MessageBody() data: { chatType: string; chatId: string },
+        @ConnectedSocket() client: Socket,
+    ): void {
+        const { chatType, chatId } = data;
+
+        // Crear el nombre del room
+        const roomName = `${chatType}:${chatId}`;
+
+        // Unir al usuario al room
+        client.join(roomName);
+        console.log(`Usuario ${client.id} se unió al chat ${roomName}`);
     }
 }

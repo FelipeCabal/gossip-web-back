@@ -1,20 +1,19 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-@Schema({
-    timestamps: true
-})
-export class mensajesSchema {
+@Schema({ timestamps: true })
+export class Mensajes extends Document {
+    @Prop({ required: true })
+    usuarioId: number;
 
-    @Prop({
-        required: true
-    })
-    usuarioId: number
+    @Prop({ required: true, trim: true })
+    mensaje: string;
 
-    @Prop({
-        trim: true
-    })
-    mensaje: string
+    @Prop({ required: true })
+    chatId: string;
+
+    @Prop({ required: true })
+    chatType: string; // Tipo de chat: 'private', 'group', 'community'
 }
 
-export const mensajeModelSchema = SchemaFactory.createForClass(mensajesSchema)
+export const MensajesSchema = SchemaFactory.createForClass(Mensajes);

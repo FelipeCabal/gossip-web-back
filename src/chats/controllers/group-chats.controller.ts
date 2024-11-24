@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, Request, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { AuthGuard } from "src/auth/guards/auth.guard";
 import { GroupChatsService } from "../services/gruop-chats.service";
 import { createGrupoDto } from "../dto/GruposDto/create-grupos.dto";
 import { Grupos } from "../entities/chats.entity";
 import { updateGruposDto } from "../dto/GruposDto/update-grupos.dto";
+import { ComunityAndGroupQueries } from "../dto/queries/comunities-queries.dto";
 
 @Controller('group')
 @ApiTags('group-chats')
@@ -24,9 +25,12 @@ export class GroupChatsController {
 
     @Get()
     @ApiOperation({ summary: 'Get all users group' })
-    findAllGroupsByUser(@Request() req: any) {
+    findAllGroupsByUser(
+        @Request() req: any,
+        @Query() queries: ComunityAndGroupQueries
+    ) {
         const userId = req.user.id
-        return this.groupChatsService.findAll(userId);
+        return this.groupChatsService.findAllGroups(userId, queries);
     }
 
     @Get(':id')

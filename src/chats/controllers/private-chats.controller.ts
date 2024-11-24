@@ -1,7 +1,8 @@
-import { Controller, Delete, Get, Param, Request, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Param, Query, Request, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { PrivateChatsService } from "../services/private-chats.service";
 import { AuthGuard } from "src/auth/guards/auth.guard";
+import { ComunityAndGroupQueries } from "../dto/queries/comunities-queries.dto";
 
 @Controller('private')
 @ApiTags('private-chats')
@@ -11,9 +12,12 @@ export class PrivateChatsController {
 
     @Get()
     @ApiOperation({ summary: 'Get all users private chats' })
-    findAllPrivateChats(@Request() req: any) {
+    findAllPrivateChats(
+        @Request() req: any,
+        @Query() chatQueries: ComunityAndGroupQueries,
+    ) {
         const userId = req.user.id
-        return this.privateChatsService.findAllUserChats(userId);
+        return this.privateChatsService.findAllUserChats(userId, chatQueries);
     }
 
     @Get(':id')

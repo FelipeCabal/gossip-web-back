@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { SALT_ROUNDS } from 'src/config/constants/bycript.constants';
 import { SolicitudAmistad } from '../entities/solicitud.entity';
 import { SolicitudesAmistadService } from './solicitudesAmistad.service';
+import { UserQueries } from '../dto/querie.dto';
 
 @Injectable()
 export class UsersService {
@@ -32,32 +33,42 @@ export class UsersService {
     return user
   }
 
-  async findUsers(userName: string, userId: number) {
+  async findAllUsers(userId: number, userQueries: UserQueries): Promise<User[]> {
 
     const userFriends = await this.findAllFriends(userId);
+    const friendIds = userFriends.map((friend) => friend.user.id);
 
-    const friendsIds = userFriends.map((friend) => friend.user.id);
+    let usersQuery = this.userRepository.createQueryBuilder('user');
 
-    const searchFriendName = await this.userRepository
-      .createQueryBuilder("user")
-      .where("user.id IN (:...friendsIds)", { friendsIds })
-      .andWhere("user.name ILIKE :userName ", { userName: `%${userName}%` })
-      .getMany();
+    usersQuery = usersQuery.orderBy(
+      `CASE WHEN user.id IN (:...friendIds) THEN 1 ELSE 2 END`,
+      'ASC'
+    ).setParameter('friendIds', friendIds);
 
-    const searchUserName = await this.userRepository
-      .createQueryBuilder("user")
-      .where("user.id NOT IN (:...friendsIds)", { friendsIds })
-      .andWhere("user.id != :userId", { userId })
-      .andWhere("user.name ILIKE :userName", { userName: `%${userName}%` })
-      .getMany();
-
-    if (!searchFriendName.length || !searchUserName.length) {
-      throw new HttpException("There aren't users with this Name", HttpStatus.NOT_FOUND)
+    if (userQueries.search) {
+      usersQuery = usersQuery.andWhere(
+        'user.nombre ILIKE :search OR user.email ILIKE :search',
+        { search: `%${userQueries.search}%` }
+      );
     }
-    const findUsersByName = [...searchFriendName, ...searchUserName]
 
-    return findUsersByName
+    if (userQueries.country) {
+      usersQuery = usersQuery.andWhere('user.pais ILIKE :country', { country: userQueries.country });
+    }
+
+    if (userQueries.limit) {
+      usersQuery = usersQuery.take(userQueries.limit);
+    }
+
+    const users = await usersQuery.getMany();
+
+    if (users.length === 0) {
+      throw new NotFoundException('No se encontraron usuarios que coincidan con la búsqueda.');
+    }
+
+    return users;
   }
+
 
   async findAllFriends(userId: number): Promise<{ solicitudId: SolicitudAmistad; user: User }[]> {
     const friendsList = await this.userRepository
@@ -95,7 +106,7 @@ export class UsersService {
   async findOneUser(id: number): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: id },
-      relations: ['grupos'],
+      relations: ['grupos', 'comunidades'],
     });
 
     if (!user) {
