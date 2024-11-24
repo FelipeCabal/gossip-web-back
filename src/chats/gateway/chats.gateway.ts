@@ -22,6 +22,8 @@ export class MessagesGateway implements OnGatewayInit {
 
         this.server.use((socket, next) => {
             const token = socket.handshake.headers.authorization;
+            console.log(token)
+            console.log(socket.handshake)
             try {
                 const user = this.jwtService.verify(token.replace('Bearer ', ''));
                 socket.data.user = user;
