@@ -10,7 +10,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { ComentariosModule } from './publicaciones/comentarios/comentarios.module';
-import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
