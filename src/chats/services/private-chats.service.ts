@@ -98,19 +98,23 @@ export class PrivateChatsService {
         try {
             const chat = await this.privateChatsRepository.findOne({
                 where: { id },
-                relations: ['amistad']
+                relations: [
+                    'amistad',
+                    'amistad.userEnvia',
+                    'amistad.userRecibe'
+                ]
             });
 
             if (!chat) {
                 throw new HttpException(
                     `ChatPrivado con ID ${id} no encontrado.`,
                     HttpStatus.NOT_FOUND
-                )
+                );
             }
 
-            return chat
+            return chat;
         } catch (error) {
-            throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
+            throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
