@@ -40,10 +40,18 @@ export class UsersService {
 
     let usersQuery = this.userRepository.createQueryBuilder('user');
 
-    usersQuery = usersQuery.orderBy(
-      `CASE WHEN user.id IN (:...friendIds) THEN 1 ELSE 2 END`,
-      'ASC'
-    ).setParameter('friendIds', friendIds);
+    if (friendIds.length > 0) {
+      usersQuery = usersQuery
+        .orderBy(
+          `CASE WHEN user.id IN (:...friendIds) THEN 1 ELSE 2 END`,
+          'ASC'
+        )
+        .setParameter('friendIds', friendIds);
+    } else {
+      usersQuery = usersQuery.orderBy('user.id', 'ASC');
+    }
+
+    usersQuery = usersQuery.addOrderBy('user.nombre', 'ASC');
 
     if (userQueries.search) {
       usersQuery = usersQuery.andWhere(
