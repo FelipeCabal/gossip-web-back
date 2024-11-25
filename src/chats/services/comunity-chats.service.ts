@@ -157,7 +157,7 @@ export class ComunidadesService {
     async findCommunityById(id: number): Promise<Comunidades> {
         const community = await this.comunidadesRepository.findOne({
             where: { id },
-            relations: ['miembros'],
+            relations: ['miembros', 'miembros.usuario'],
         });
 
         if (!community) {
