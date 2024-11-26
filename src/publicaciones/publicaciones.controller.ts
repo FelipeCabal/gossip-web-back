@@ -58,8 +58,8 @@ export class PublicacionesController {
    */
   @Get('user/:user')
   @ApiOperation({ summary: "Get all an user's posts" })
-  findByUser(@Param('user') user: number) {
-    return this.publicacionesService.findByUser(user);
+  findByUser(@Param('user') user: string) {
+    return this.publicacionesService.findByUser(+user);
   }
 
   /**
@@ -89,7 +89,7 @@ export class PublicacionesController {
   @IsPrivate()
   @ApiOperation({ summary: "Delete a posts" })
   remove(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Request() req: any
   ) {
     const usuario = req.user

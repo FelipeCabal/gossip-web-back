@@ -45,7 +45,7 @@ export class PublicacionesService {
   async findAll(userId: number) {
     const friends = await this.usersService.findAllFriends(userId);
 
-    const friendsIds = friends.map((friend => friend.id));
+    const friendsIds = friends.map((friend => friend.user.id));
 
     let friendsPosts = []
     let otherPosts = []

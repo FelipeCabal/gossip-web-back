@@ -7,6 +7,7 @@ import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class LikesService {
+
   constructor(
     @InjectRepository(Like)
     private readonly likeRepository: Repository<Like>,
