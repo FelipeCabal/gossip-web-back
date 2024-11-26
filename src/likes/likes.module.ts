@@ -4,7 +4,7 @@ import { LikesController } from './likes.controller';
 import { UsersModule } from 'src/users/users.module';
 import { PublicacionesModule } from 'src/publicaciones/publicaciones.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Like } from './entities/like.entity';
+import { Like } from './like.entity';
 import { PublicacionesService } from 'src/publicaciones/publicaciones.service';
 import { UsersService } from 'src/users/services/users.service';
 

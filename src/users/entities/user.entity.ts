@@ -4,7 +4,7 @@ import { InvitacionesGrupos } from "src/chats/entities/invitaciones.entity";
 import { Publicaciones } from "src/publicaciones/entities/publicaciones.entity";
 import { Column, Entity, IsNull, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { SolicitudAmistad } from "./solicitud.entity";
-import { Like } from "src/likes/entities/like.entity";
+import { Like } from "src/likes/like.entity";
 
 @Entity('users')
 export class User {

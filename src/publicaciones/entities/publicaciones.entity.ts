@@ -1,4 +1,4 @@
-import { Like } from "src/likes/entities/like.entity";
+import { Like } from "src/likes/like.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 

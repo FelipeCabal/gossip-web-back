@@ -1,4 +1,4 @@
-import { Controller, Post, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Param, UseGuards, Req, Get } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 
@@ -14,5 +14,19 @@ export class LikesController {
   ) {
     const userId = req.user;
     return this.likesService.manejoLikes(userId.id, postId);
+  }
+
+  @Get(':postId')
+  async findAllLikes(
+    @Param('postId') postId: number
+  ) {
+    return this.likesService.findAllLikes(postId);
+  }
+
+  @Get('like/:likeId')
+  async findOneLike(
+    @Param('likeId') likeId: number
+  ) {
+    return this.likesService.findOneLike(likeId);
   }
 }
