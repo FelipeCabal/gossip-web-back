@@ -1,5 +1,6 @@
+import { Like } from "src/likes/like.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('publicaciones')
 export class Publicaciones {
@@ -17,4 +18,7 @@ export class Publicaciones {
 
     @ManyToOne(() => User, (user) => user.publicaciones)
     user: User
+
+    @OneToMany(() => Like, (likes) => likes.publicaciones)
+    likes: Like[]
 }
