@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 @WebSocketGateway({
     cors: { origin: '*' },
     methods: ['GET', 'POST'],
+    allowedHeaders: ['Authorization'], // Permitir el header `Authorization`
     transports: ['websocket'],
 })
 export class MessagesGateway implements OnGatewayInit {
@@ -20,7 +21,11 @@ export class MessagesGateway implements OnGatewayInit {
         this.server = server;
 
         this.server.use((socket, next) => {
-            const token = socket.handshake.headers.authorization;
+            let token = socket.handshake.query.token || socket.handshake.headers.authorization
+
+            token = Array.isArray(token) ? token[0] : token;
+            console.log(token)
+            console.log(socket.handshake)
             try {
                 const user = this.jwtService.verify(token.replace('Bearer ', ''));
                 socket.data.user = user;
@@ -29,6 +34,9 @@ export class MessagesGateway implements OnGatewayInit {
                 next(new Error('Unauthorized'));
             }
         });
+    }
+    handleConnection(client: any) {
+        console.log('Headers del cliente:', client.handshake.headers);
     }
 
     @SubscribeMessage('joinChat')

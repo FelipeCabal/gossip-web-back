@@ -6,7 +6,7 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { ComunityAndGroupQueries } from '../dto/queries/comunities-queries.dto';
 
-@Controller('comunidades')
+@Controller('community')
 @ApiTags('comunidades')
 @UseGuards(AuthGuard)
 export class ComunidadesController {
@@ -17,13 +17,21 @@ export class ComunidadesController {
         return this.comunidadesService.findAll(queries);
     }
 
-    @Get(':id')
+    @Get('user/:id')
     @ApiOperation({ summary: 'obtener todas las comunidades de un usuario' })
     findUsersComunity(
         @Param('id', ParseIntPipe) userId: number,
         @Query() queries: ComunityAndGroupQueries
     ) {
         return this.comunidadesService.findAllUserComunities(userId, queries)
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'obtener una comunidad por el id' })
+    findCommunity(
+        @Param('id', ParseIntPipe) communityId: number,
+    ) {
+        return this.comunidadesService.findCommunityById(communityId)
     }
 
     @Post()
