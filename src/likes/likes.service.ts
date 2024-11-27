@@ -43,7 +43,7 @@ export class LikesService {
 
       await this.likeRepository.save(newLike);
 
-      return 'se añadió tu like al post';
+      return newLike;
     }
   }
 
@@ -64,7 +64,7 @@ export class LikesService {
       .getMany()
 
     if (likes.length === 0) {
-      return "no hay reacciones en esta publicación"
+      throw new HttpException("likes not found", HttpStatus.NOT_FOUND);
     }
 
     return likes;
