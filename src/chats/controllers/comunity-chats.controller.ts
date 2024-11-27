@@ -13,6 +13,7 @@ export class ComunidadesController {
     constructor(private readonly comunidadesService: ComunidadesService) { }
 
     @Get()
+    @ApiOperation({ summary: 'obtener todas las comunidades del usuario logueado' })
     findAll(@Query() queries: ComunityAndGroupQueries) {
         return this.comunidadesService.findAll(queries);
     }
