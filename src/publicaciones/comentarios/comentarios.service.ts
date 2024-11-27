@@ -60,7 +60,7 @@ export class ComentariosService {
                     fechaNto: user.fechaNto,
                     sexo: user.sexo,
                     pais: user.pais,
-                    imagenPerfil: user.imagen_perfil
+                    imagenPerfil: user.imagen
                 }
             }
         }));
