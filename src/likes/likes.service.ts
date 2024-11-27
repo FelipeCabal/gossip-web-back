@@ -59,6 +59,7 @@ export class LikesService {
 
     const likes = await this.likeRepository
       .createQueryBuilder('like')
+      .leftJoinAndSelect('like.user', 'users')
       .where('like.publicacionesId = :postId', { postId })
       .getMany()
 
