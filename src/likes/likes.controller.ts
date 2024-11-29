@@ -29,4 +29,11 @@ export class LikesController {
   ) {
     return this.likesService.findOneLike(likeId);
   }
+
+  @Get('user/:userId')
+  async findLikesByUser(
+    @Param('userId') userId: number
+  ) {
+    return this.likesService.findLikesByUser(userId)
+  }
 }

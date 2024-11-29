@@ -34,6 +34,9 @@ export class User {
     @Column({ nullable: true })
     imagen_perfil: string
 
+    @Column({ default: true })
+    showLikes: boolean
+
     @OneToMany(() => Publicaciones, (publicaciones) => publicaciones.user)
     publicaciones: Publicaciones[]
 
