@@ -64,7 +64,7 @@ export class SolicitudesAmistadService {
                 userRecibe: user,
                 status: Status.Pendiente
             },
-            relations: ['userEnvia']
+            relations: ['amistad', 'amistad.userEnvia']
         })
 
         return receiveReq;
