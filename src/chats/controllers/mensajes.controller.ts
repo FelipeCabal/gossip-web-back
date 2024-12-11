@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param, ParseIntPipe, Delete, Req, Request } from '@nestjs/common';
 import { MessagesService } from '../services/mensajes.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { CreateMessageDto } from '../dto/mensajesDto/create-mensaje.dto';
@@ -24,5 +24,16 @@ export class MensajesController {
     ) {
         return await this.mensajesService.findMessagesByChatId(groupId, type)
 
+    }
+
+    @Delete(':chatId')
+    @ApiOperation({ summary: 'Delete All Message from a Chat' })
+    async clearChat(
+        @Param('chatId') chatId: number,
+        @Param('chatType') chatType: string,
+        @Request() req: any
+    ) {
+        const userId = req.user.id;
+        return await this.mensajesService.ClearChat(chatId, userId, chatType);
     }
 }
