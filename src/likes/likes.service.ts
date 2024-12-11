@@ -80,7 +80,7 @@ export class LikesService {
     return like;
   }
 
-  async findLikesByUser(userId: number) {
+  async findLikesByUser(userId: number, requesterId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId }
     });
@@ -92,7 +92,9 @@ export class LikesService {
     let likes = []
 
     if (user.showLikes === false) {
-      return "No hay actividad para mostrar"
+      if (userId !== requesterId) {
+        return "No hay actividad para mostrar"
+      }
     }
     else {
 
