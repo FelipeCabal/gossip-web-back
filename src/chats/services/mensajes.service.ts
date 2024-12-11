@@ -66,24 +66,11 @@ export class MessagesService {
         }));
     }
 
-    async ClearChat(chatId: number, userId: number): Promise<{ deletedCount: number }> {
+    async ClearChat(chatId: number, userId: number, ChatType: string): Promise<{ deletedCount: number }> {
 
-        const chat = await this.privateChatsService.findOne(chatId);
-        const group = await this.groupChatService.findGroupById(chatId);
-        const comunidad = await this.comunidadesService.findCommunityById(chatId);
+        if (ChatType === 'private') {
+            const chat = await this.privateChatsService.findOne(chatId);
 
-        if (!chat && !group && !comunidad) {
-            throw new HttpException("Chat not found", HttpStatus.NOT_FOUND);
-        }
-
-        let chatType: string;
-        if (chat) chatType = 'private';
-        else if (group) chatType = 'group';
-        else if (comunidad) chatType = 'community';
-        else throw new HttpException("Chat not found", HttpStatus.NOT_FOUND);
-
-
-        if (chatType === 'private') {
             if (chat.amistad.userEnvia.id !== userId && chat.amistad.userRecibe.id !== userId) {
                 throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
             }
@@ -91,10 +78,11 @@ export class MessagesService {
             const deletedMessages = await this.mensajeModel.deleteMany({ chatId });
 
             return { deletedCount: deletedMessages.deletedCount };
-        }
 
-        if (chatType === 'group') {
-            const isMember = group.miembros.some((member) => member.id === userId);
+        } else if (ChatType === 'group') {
+            const chat = await this.groupChatService.findGroupById(chatId);
+
+            const isMember = chat.miembros.some((member) => member.id === userId);
             if (!isMember) {
                 throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
@@ -102,11 +90,12 @@ export class MessagesService {
             const deletedMessages = await this.mensajeModel.deleteMany({ chatId });
 
             return { deletedCount: deletedMessages.deletedCount }
-        }
 
-        if (chatType === 'community') {
-            const isOwner = comunidad.miembros.some((member) => member.rol === Role.Owner && member.id === userId);
-            const isAdmin = comunidad.miembros.some((member) => member.rol === Role.Admin && member.id === userId);
+        } else if (ChatType === 'community') {
+            const chat = await this.comunidadesService.findCommunityById(chatId);
+
+            const isOwner = chat.miembros.some((member) => member.rol === Role.Owner && member.id === userId);
+            const isAdmin = chat.miembros.some((member) => member.rol === Role.Admin && member.id === userId);
 
             if (!isOwner && !isAdmin) {
                 throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
@@ -115,6 +104,10 @@ export class MessagesService {
             const deletedMessages = await this.mensajeModel.deleteMany({ chatId });
 
             return { deletedCount: deletedMessages.deletedCount }
+        } else {
+            throw new HttpException('No tienes permiso para eliminar mensajes en este chat', HttpStatus.UNAUTHORIZED);
+
         }
+
     }
 }

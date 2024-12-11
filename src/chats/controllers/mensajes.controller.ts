@@ -30,9 +30,10 @@ export class MensajesController {
     @ApiOperation({ summary: 'Delete All Message from a Chat' })
     async clearChat(
         @Param('chatId') chatId: number,
+        @Param('chatType') chatType: string,
         @Request() req: any
     ) {
         const userId = req.user.id;
-        return await this.mensajesService.ClearChat(chatId, userId);
+        return await this.mensajesService.ClearChat(chatId, userId, chatType);
     }
 }
