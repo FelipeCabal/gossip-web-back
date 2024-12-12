@@ -22,6 +22,16 @@ export class SolicitudesController {
         return this.solicitudesAmistadService.sendFriendRequest(userEnviaId, userRecibeId);
     }
 
+    @Get('user')
+    @ApiOperation({ summary: 'all friend requested for an user' })
+    async RequestsUser(
+        @Request() req: any
+    ) {
+        const userId = req.user.id
+        return this.solicitudesAmistadService.findUserRequests(userId);
+    }
+
+
     @Get('user/received')
     @ApiOperation({ summary: 'all friend requested received for an user' })
     async receivedRequest(
