@@ -19,7 +19,7 @@ export class SolicitudesController {
         @Request() req: any
     ) {
         const userEnviaId = req.user.id
-        return this.solicitudesAmistadService.sendFriendRequest(userEnviaId.id, userRecibeId);
+        return this.solicitudesAmistadService.sendFriendRequest(userEnviaId, userRecibeId);
     }
 
     @Get('user/received')
