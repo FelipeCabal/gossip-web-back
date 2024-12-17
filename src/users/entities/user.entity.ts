@@ -39,6 +39,9 @@ export class User {
     @Column({ default: true })
     showLikes: boolean
 
+    @Column({ default: true })
+    showLikes: boolean
+
     @OneToMany(() => Publicaciones, (publicaciones) => publicaciones.user)
     publicaciones: Publicaciones[]
 

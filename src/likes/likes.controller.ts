@@ -34,4 +34,13 @@ export class LikesController {
   ) {
     return this.likesService.findOneLike(likeId);
   }
+
+  @Get('user/:userId')
+  async findLikesByUser(
+    @Param('userId') userId: number,
+    @Req() req: any
+  ) {
+    const requesterId = req.user.id;
+    return this.likesService.findLikesByUser(userId, requesterId)
+  }
 }

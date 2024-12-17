@@ -81,4 +81,32 @@ export class LikesService {
 
     return like;
   }
+
+  async findLikesByUser(userId: number, requesterId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+    }
+
+    let likes = []
+
+    if (user.showLikes === false) {
+      if (userId !== requesterId) {
+        return "No hay actividad para mostrar"
+      }
+    }
+    else {
+
+      likes = await this.publicacionesRepository
+        .createQueryBuilder('post')
+        .innerJoin('post.likes', 'like')
+        .where("like.userId = :userId", { userId })
+        .getMany();
+
+      return likes;
+    }
+  }
 }
