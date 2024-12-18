@@ -103,6 +103,7 @@ export class LikesService {
       likes = await this.publicacionesRepository
         .createQueryBuilder('post')
         .innerJoin('post.likes', 'like')
+        .leftJoinAndSelect('post.user', 'user')
         .where("like.userId = :userId", { userId })
         .getMany();
 
