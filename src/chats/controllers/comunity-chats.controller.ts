@@ -45,7 +45,7 @@ export class ComunidadesController {
         return this.comunidadesService.create(createCommunityDto, ownerId);
     }
 
-    @Patch(':id/miembros')
+    @Post(':id/miembros')
     @ApiOperation({ summary: 'Añadir miembro a comunidad' })
     addMember(
         @Param('id', ParseIntPipe) communityId: number,
